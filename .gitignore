@@ -1,0 +1,24 @@
+# Data directory (stored outside repo)
+.yoad-jobs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node (for skills installer)
+node_modules/
+package-lock.json
+
+# Python
+__pycache__/
+*.pyc
+.env
+
+# Claude plans (local only)
+.claude/plans/
