@@ -6,62 +6,71 @@ allowed-tools: WebFetch
 
 # Ashby Remote Job Scanner
 
-Scan all Ashby-powered companies for remote software development positions worldwide.
+Scan Ashby-powered companies for remote software development positions worldwide.
 
-## Ashby Companies
+By default, scan the **Top 15** companies most likely to have junior-friendly remote roles. If the user asks for a broader scan, use the extended list. If they say "all", scan everything — but warn it may take a while.
+
+## Top 15 Companies (Default Scan)
+
+These companies are known for remote-friendly hiring and developer roles:
 
 | Company | Endpoint |
 |---------|----------|
 | linear | https://api.ashbyhq.com/posting-api/job-board/linear |
+| supabase | https://api.ashbyhq.com/posting-api/job-board/supabase |
+| deel | https://api.ashbyhq.com/posting-api/job-board/deel |
+| cursor | https://api.ashbyhq.com/posting-api/job-board/cursor |
+| posthog | https://api.ashbyhq.com/posting-api/job-board/posthog |
+| snyk | https://api.ashbyhq.com/posting-api/job-board/snyk |
+| clickup | https://api.ashbyhq.com/posting-api/job-board/clickup |
 | notion | https://api.ashbyhq.com/posting-api/job-board/notion |
-| revenuecat | https://api.ashbyhq.com/posting-api/job-board/revenuecat |
-| clerk | https://api.ashbyhq.com/posting-api/job-board/clerk |
-| neon | https://api.ashbyhq.com/posting-api/job-board/neon |
-| ramp | https://api.ashbyhq.com/posting-api/job-board/ramp |
 | render | https://api.ashbyhq.com/posting-api/job-board/render |
 | retool | https://api.ashbyhq.com/posting-api/job-board/retool |
 | railway | https://api.ashbyhq.com/posting-api/job-board/railway |
-| supabase | https://api.ashbyhq.com/posting-api/job-board/supabase |
-| cohere | https://api.ashbyhq.com/posting-api/job-board/cohere |
-| openai | https://api.ashbyhq.com/posting-api/job-board/openai |
-| cursor | https://api.ashbyhq.com/posting-api/job-board/cursor |
-| deel | https://api.ashbyhq.com/posting-api/job-board/deel |
-| ashby | https://api.ashbyhq.com/posting-api/job-board/ashby |
-| braintrust | https://api.ashbyhq.com/posting-api/job-board/braintrust |
-| drata | https://api.ashbyhq.com/posting-api/job-board/drata |
-| freshpaint | https://api.ashbyhq.com/posting-api/job-board/freshpaint |
-| helion | https://api.ashbyhq.com/posting-api/job-board/helion |
-| juicebox | https://api.ashbyhq.com/posting-api/job-board/juicebox |
-| kustomer | https://api.ashbyhq.com/posting-api/job-board/kustomer |
-| motion | https://api.ashbyhq.com/posting-api/job-board/motion |
-| posthog | https://api.ashbyhq.com/posting-api/job-board/posthog |
-| replit | https://api.ashbyhq.com/posting-api/job-board/replit |
-| snyk | https://api.ashbyhq.com/posting-api/job-board/snyk |
-| sprig | https://api.ashbyhq.com/posting-api/job-board/sprig |
-| svix | https://api.ashbyhq.com/posting-api/job-board/svix |
-| stedi | https://api.ashbyhq.com/posting-api/job-board/stedi |
-| tldraw | https://api.ashbyhq.com/posting-api/job-board/tldraw |
+| clerk | https://api.ashbyhq.com/posting-api/job-board/clerk |
+| neon | https://api.ashbyhq.com/posting-api/job-board/neon |
 | vanta | https://api.ashbyhq.com/posting-api/job-board/vanta |
 | workos | https://api.ashbyhq.com/posting-api/job-board/workos |
+
+## Extended List (use when user asks for "more" or "all")
+
+| Company | Endpoint |
+|---------|----------|
+| openai | https://api.ashbyhq.com/posting-api/job-board/openai |
+| cohere | https://api.ashbyhq.com/posting-api/job-board/cohere |
+| ramp | https://api.ashbyhq.com/posting-api/job-board/ramp |
+| ashby | https://api.ashbyhq.com/posting-api/job-board/ashby |
+| replit | https://api.ashbyhq.com/posting-api/job-board/replit |
+| drata | https://api.ashbyhq.com/posting-api/job-board/drata |
+| motion | https://api.ashbyhq.com/posting-api/job-board/motion |
+| fullstory | https://api.ashbyhq.com/posting-api/job-board/fullstory |
+| deepgram | https://api.ashbyhq.com/posting-api/job-board/deepgram |
+| hightouch | https://api.ashbyhq.com/posting-api/job-board/hightouch |
+| benchling | https://api.ashbyhq.com/posting-api/job-board/benchling |
 | pinecone | https://api.ashbyhq.com/posting-api/job-board/pinecone |
+| runway | https://api.ashbyhq.com/posting-api/job-board/runway |
+| perplexity | https://api.ashbyhq.com/posting-api/job-board/perplexity |
+| scaleai | https://api.ashbyhq.com/posting-api/job-board/scaleai |
+| revenuecat | https://api.ashbyhq.com/posting-api/job-board/revenuecat |
+| braintrust | https://api.ashbyhq.com/posting-api/job-board/braintrust |
+| greptile | https://api.ashbyhq.com/posting-api/job-board/greptile |
 | podium | https://api.ashbyhq.com/posting-api/job-board/podium |
 | primer | https://api.ashbyhq.com/posting-api/job-board/primer |
 | reka | https://api.ashbyhq.com/posting-api/job-board/reka |
-| runway | https://api.ashbyhq.com/posting-api/job-board/runway |
-| sieve | https://api.ashbyhq.com/posting-api/job-board/sieve |
+| stedi | https://api.ashbyhq.com/posting-api/job-board/stedi |
 | golinks | https://api.ashbyhq.com/posting-api/job-board/golinks |
-| greptile | https://api.ashbyhq.com/posting-api/job-board/greptile |
-| hightouch | https://api.ashbyhq.com/posting-api/job-board/hightouch |
-| fullstory | https://api.ashbyhq.com/posting-api/job-board/fullstory |
-| deepgram | https://api.ashbyhq.com/posting-api/job-board/deepgram |
-| clickup | https://api.ashbyhq.com/posting-api/job-board/clickup |
-| benchling | https://api.ashbyhq.com/posting-api/job-board/benchling |
 | paragon | https://api.ashbyhq.com/posting-api/job-board/paragon |
-| oso | https://api.ashbyhq.com/posting-api/job-board/oso |
 | creditgenie | https://api.ashbyhq.com/posting-api/job-board/creditgenie |
-| scaleai | https://api.ashbyhq.com/posting-api/job-board/scaleai |
 | anyscale | https://api.ashbyhq.com/posting-api/job-board/anyscale |
-| perplexity | https://api.ashbyhq.com/posting-api/job-board/perplexity |
+| helion | https://api.ashbyhq.com/posting-api/job-board/helion |
+| freshpaint | https://api.ashbyhq.com/posting-api/job-board/freshpaint |
+| juicebox | https://api.ashbyhq.com/posting-api/job-board/juicebox |
+| kustomer | https://api.ashbyhq.com/posting-api/job-board/kustomer |
+| sprig | https://api.ashbyhq.com/posting-api/job-board/sprig |
+| svix | https://api.ashbyhq.com/posting-api/job-board/svix |
+| tldraw | https://api.ashbyhq.com/posting-api/job-board/tldraw |
+| sieve | https://api.ashbyhq.com/posting-api/job-board/sieve |
+| oso | https://api.ashbyhq.com/posting-api/job-board/oso |
 
 ## Instructions
 
@@ -69,8 +78,9 @@ User query: $ARGUMENTS
 
 ### Scanning Process
 
-1. **Batch fetching**: Process companies in batches of 5-8 to avoid rate limits
-2. For each company, WebFetch the endpoint with this prompt:
+1. **Default**: Fetch the **Top 15** companies. Only use the extended list if the user explicitly asks for more.
+2. Fetch all companies in a **single batch** — do NOT split into multiple sequential batches (this causes timeouts). WebFetch them all in one pass.
+3. For each company, WebFetch the endpoint with this prompt:
    ```
    List all job postings. For each job, return: title, location, isRemote (true/false),
    workplaceType (Remote/Hybrid/OnSite), department, employmentType, and the jobUrl.

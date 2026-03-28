@@ -28,9 +28,19 @@ class TestAshbyCompanyList:
     def setup_method(self):
         self.content = SKILL_PATH.read_text()
 
-    def test_minimum_50_companies(self):
+    def test_has_top_15_and_extended(self):
         endpoints = len(re.findall(r"ashbyhq\.com/posting-api/job-board/", self.content))
-        assert endpoints >= 40, f"Expected 40+ Ashby endpoints, found {endpoints}"
+        assert endpoints >= 40, f"Expected 40+ Ashby endpoints (top 15 + extended), found {endpoints}"
+
+    def test_top_15_section_exists(self):
+        assert "Top 15" in self.content
+
+    def test_extended_list_section_exists(self):
+        assert "Extended" in self.content
+
+    def test_default_scan_is_top_15(self):
+        lower = self.content.lower()
+        assert "default" in lower and "15" in lower
 
     def test_has_openai(self):
         assert "openai" in self.content.lower()
@@ -106,11 +116,9 @@ class TestBatchProcessing:
         self.content = SKILL_PATH.read_text()
         self.lower = self.content.lower()
 
-    def test_batch_mentioned(self):
-        assert "batch" in self.lower
-
-    def test_rate_limit_mentioned(self):
-        assert "rate" in self.lower or "batch" in self.lower
+    def test_single_batch_instruction(self):
+        lower = self.content.lower()
+        assert "single batch" in lower or "do not split" in lower, "Should instruct single-batch fetching to avoid timeouts"
 
 
 class TestOutputFormat:

@@ -5,10 +5,13 @@ SKILL_PATH = pathlib.Path.home() / "yoad" / ".claude" / "skills" / "israel-jobs"
 
 
 class TestIsraeliJobBoards:
-    """Verify all 9 Israeli job board sites are listed."""
+    """Verify all 10 Israeli job board sites are listed."""
 
     def setup_method(self):
         self.content = SKILL_PATH.read_text()
+
+    def test_junio_listed(self):
+        assert "junio.co.il" in self.content
 
     def test_alljobs_listed(self):
         assert "alljobs.co.il" in self.content
@@ -96,3 +99,17 @@ class TestWebSearchPatterns:
     def test_deduplication_mentioned(self):
         lower = self.content.lower()
         assert "dedup" in lower or "duplicate" in lower
+
+
+class TestErrorHandling:
+    """Verify 403 error handling instructions."""
+
+    def setup_method(self):
+        self.content = SKILL_PATH.read_text()
+
+    def test_403_handling_documented(self):
+        assert "403" in self.content
+
+    def test_fallback_to_websearch(self):
+        lower = self.content.lower()
+        assert "fall back" in lower or "fallback" in lower

@@ -1,0 +1,12 @@
+{
+  "expectations": [
+    {"text": "WebSearch queries target multiple Israeli job sites", "passed": true, "evidence": "Transcript Step 2: 9 queries across il.indeed.com, janglo.net, secrettelaviv.com, wellfound.com, startup.jobs, junio.co.il, alljobs.co.il, drushim.co.il, jobmaster.co.il, gotfriends.co.il"},
+    {"text": "Both Hebrew and English search queries are used", "passed": true, "evidence": "5 English queries + 4 Hebrew queries. Hebrew terms: 'מפתח תוכנה ג׳וניור', 'מתכנת ללא ניסיון'"},
+    {"text": "Results are scored by fit level (High/Medium/Low)", "passed": true, "evidence": "Results: '5 High-fit matches', '6 Medium-fit matches', '1 Low-fit', '3 Skipped'"},
+    {"text": "Output references ~/.yoad-jobs/ data directory", "passed": true, "evidence": "Transcript Step 0: checks ~/.yoad-jobs/preferences.md and ~/.yoad-jobs/job-history.md. Step 6: appends to job-history.md"},
+    {"text": "Results include source attribution", "passed": true, "evidence": "Every listing shows source: GotFriends, Drushim, startup.jobs, Indeed IL, etc."},
+    {"text": "JUNIO.co.il is included in the search queries", "passed": true, "evidence": "Transcript Step 2 query 5: 'junior developer site:junio.co.il'. WebFetch failed (expired cert), fell back to WebSearch."},
+    {"text": "403 errors are handled gracefully with WebSearch fallback", "passed": true, "evidence": "Transcript: 'startup.jobs and JUNIO.co.il pages were not directly fetchable (403 and expired certificate respectively). Per skill instructions, fell back to WebSearch with site: filter'"}
+  ],
+  "summary": {"passed": 7, "failed": 0, "total": 7, "pass_rate": 1.0}
+}

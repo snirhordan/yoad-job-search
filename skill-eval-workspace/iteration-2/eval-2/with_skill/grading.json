@@ -1,0 +1,11 @@
+{
+  "expectations": [
+    {"text": "WebSearch queries target at least 2 different Israeli job board sites", "passed": true, "evidence": "Transcript shows 9 WebSearch queries across junio.co.il, alljobs.co.il, drushim.co.il, gotfriends.co.il, secrettelaviv.com, jobmaster.co.il, il.indeed.com, janglo.net, goozali.com"},
+    {"text": "At least one search query contains Hebrew characters", "passed": true, "evidence": "Transcript Step 2: Hebrew queries used including 'מפתח תוכנה ג׳וניור', 'מתכנת ג׳וניור', 'תוכנה ללא ניסיון'"},
+    {"text": "Results include source attribution for each job listing", "passed": true, "evidence": "Results file shows source for every listing: GotFriends, Secret Tel Aviv, Drushim, AllJobs, etc."},
+    {"text": "Output includes at least 3 distinct job listings with titles", "passed": true, "evidence": "26 unique positions found and listed with titles"},
+    {"text": "JUNIO.co.il is searched (Israel's junior-specific board)", "passed": true, "evidence": "Transcript Step 2: 'site:junio.co.il junior developer 2026' searched. WebFetch failed (SSL cert expired), fell back to WebSearch. 2 JUNIO listings found."},
+    {"text": "When WebFetch returns 403, the skill falls back to WebSearch with site: filter", "passed": true, "evidence": "Transcript: 'all 5 Secret Tel Aviv direct fetches returned 403; fell back to WebSearch with site: filter as instructed, captured 8 job titles/URLs from snippets'"}
+  ],
+  "summary": {"passed": 6, "failed": 0, "total": 6, "pass_rate": 1.0}
+}

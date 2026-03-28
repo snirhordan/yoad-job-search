@@ -1,0 +1,13 @@
+{
+  "eval_id": 2,
+  "eval_name": "israel-jobs-general-search-v2",
+  "prompt": "search for junior software developer jobs in Israel across all the Israeli job boards. yoad just graduated and has no preference on tech stack",
+  "assertions": [
+    {"text": "WebSearch queries target at least 2 different Israeli job board sites"},
+    {"text": "At least one search query contains Hebrew characters"},
+    {"text": "Results include source attribution for each job listing"},
+    {"text": "Output includes at least 3 distinct job listings with titles"},
+    {"text": "JUNIO.co.il is searched (Israel's junior-specific board)"},
+    {"text": "When WebFetch returns 403, the skill falls back to WebSearch with site: filter"}
+  ]
+}

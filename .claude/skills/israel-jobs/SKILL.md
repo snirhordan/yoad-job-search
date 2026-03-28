@@ -68,6 +68,7 @@ allowed-tools: WebFetch, WebSearch
 
 | Site | URL | Language | Search Pattern |
 |------|-----|----------|---------------|
+| JUNIO | https://www.junio.co.il | HE/EN | WebSearch: `site:junio.co.il developer` — Israel's only junior-specific hi-tech job board |
 | AllJobs | https://www.alljobs.co.il | Hebrew | WebSearch: `site:alljobs.co.il מפתח תוכנה ג'וניור` |
 | Drushim | https://www.drushim.co.il | Hebrew | WebSearch: `site:drushim.co.il מפתח תוכנה` |
 | Jobmaster | https://www.jobmaster.co.il | Hebrew | WebSearch: `site:jobmaster.co.il מתכנת` |
@@ -75,8 +76,16 @@ allowed-tools: WebFetch, WebSearch
 | Indeed IL | https://il.indeed.com | EN/HE | WebFetch: `https://il.indeed.com/jobs?q=junior+developer&l=Israel` |
 | Goozali | https://en.goozali.com | English | WebFetch: Google Sheets-based, filterable |
 | Janglo | https://www.janglo.net/jobs | English | WebSearch: `site:janglo.net developer jobs` |
-| Secret TLV | https://jobs.secrettelaviv.com | English | WebSearch: `site:secrettelaviv.com developer` |
+| Secret TLV | https://jobs.secrettelaviv.com | English | WebSearch: `site:secrettelaviv.com developer` (may return 403 — use WebSearch instead of WebFetch) |
 | Wellfound | https://wellfound.com/location/israel | English | WebFetch: Israel startup jobs |
+
+### Handling 403 Errors
+
+Some Israeli sites (Secret Tel Aviv, AllJobs direct pages) block direct WebFetch with 403 errors. When this happens:
+1. Do NOT retry the same URL — it will fail again
+2. Fall back to WebSearch with `site:` filter to find listings indirectly
+3. Extract job details from the WebSearch snippets instead
+4. Note in results that direct fetch was blocked
 
 ## Hebrew Search Keywords
 

@@ -50,12 +50,13 @@ Run parallel WebSearch queries across Israeli job boards:
 2. `"junior developer" OR "entry level developer" Israel site:janglo.net OR site:secrettelaviv.com`
 3. `"software developer" Israel junior site:wellfound.com OR site:startup.jobs`
 4. `"developer" Israel junior OR entry site:goozali.com`
+5. `junior developer site:junio.co.il` — JUNIO is Israel's only junior-specific hi-tech job board, always check it
 
 **Hebrew searches:**
-5. `"מפתח תוכנה" ג'וניור site:alljobs.co.il`
-6. `"מתכנת" OR "מפתח תוכנה" ללא ניסיון site:drushim.co.il`
-7. `"מפתח תוכנה" ג'וניור site:jobmaster.co.il`
-8. `"junior developer" OR "מפתח" site:gotfriends.co.il`
+6. `"מפתח תוכנה" ג'וניור site:alljobs.co.il`
+7. `"מתכנת" OR "מפתח תוכנה" ללא ניסיון site:drushim.co.il`
+8. `"מפתח תוכנה" ג'וניור site:jobmaster.co.il`
+9. `"junior developer" OR "מפתח" site:gotfriends.co.il`
 
 If `$ARGUMENTS` is provided, replace default keywords but keep the site filters.
 
@@ -81,6 +82,12 @@ For High-fit and Medium-fit jobs:
 1. WebFetch the job posting URL to get full description
 2. Extract: requirements, tech stack, salary (if listed), company info
 3. Note anything relevant to Yoad's profile
+
+**Handling 403 errors**: Some Israeli sites (Secret Tel Aviv, AllJobs direct pages) block WebFetch with 403 errors. When this happens:
+- Do NOT retry the same URL
+- Fall back to WebSearch with `site:` filter to find the listing
+- Extract details from the WebSearch snippet instead
+- Note in results that direct fetch was blocked
 
 ### Step 6: Save History
 

@@ -47,6 +47,7 @@ For Israeli-native job boards (AllJobs, Drushim, Jobmaster):
 | Source | Type | Language | Access Method |
 |--------|------|----------|---------------|
 | Indeed MCP | Global + Israel | EN/HE | Claude MCP connector |
+| JUNIO.co.il | Junior-specific IL | HE/EN | WebSearch — Israel's only junior hi-tech board |
 | AllJobs.co.il | Israeli native | HE | WebSearch/WebFetch |
 | Drushim.co.il | Israeli native | HE | WebSearch/WebFetch |
 | Jobmaster.co.il | Israeli native | HE | WebSearch/WebFetch |

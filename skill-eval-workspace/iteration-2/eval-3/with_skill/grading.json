@@ -1,0 +1,11 @@
+{
+  "expectations": [
+    {"text": "Scan completes without timing out", "passed": true, "evidence": "Completed in 226.8s with 34028 tokens. Previous iteration timed out twice."},
+    {"text": "Only the Top 15 companies are scanned by default (not the extended list)", "passed": true, "evidence": "Transcript: 'Scan scope: Top 15 companies (default)'. Lists exactly 15 companies: Linear, Supabase, Deel, Cursor, PostHog, Snyk, ClickUp, Notion, Render, Retool, Railway, Clerk, Neon, Vanta, WorkOS"},
+    {"text": "Results are filtered for remote positions", "passed": true, "evidence": "Transcript: filtering criteria show 'isRemote' and 'workplaceType: Remote' checks. All 14 results are remote-tagged."},
+    {"text": "Senior/staff/principal roles are excluded", "passed": true, "evidence": "Transcript explicitly notes exclusions: 'Senior Full-Stack excluded', 'Staff Backend Engineer excluded', 'Staff Software Engineer excluded', 'Senior Sales Manager -- excluded'"},
+    {"text": "Results include company name, job title, and apply URL", "passed": true, "evidence": "Results file contains table with Company, Title, Type, Apply URL columns for all 14 matches"},
+    {"text": "A summary total is provided (X jobs found across Y companies)", "passed": true, "evidence": "Results: '14 remote dev-relevant jobs found across 7 companies out of 15 Ashby companies scanned'"}
+  ],
+  "summary": {"passed": 6, "failed": 0, "total": 6, "pass_rate": 1.0}
+}
