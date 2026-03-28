@@ -1,0 +1,35 @@
+{
+  "expectations": [
+    {
+      "text": "WebSearch is used to query at least 2 different Israeli job board sites (e.g., alljobs.co.il, drushim.co.il, il.indeed.com, janglo.net)",
+      "passed": false,
+      "evidence": "No output files exist in the outputs/ directory. The run appears to have produced no results.md or transcript.md. Cannot verify any assertions."
+    },
+    {
+      "text": "At least one search query contains Hebrew characters (e.g., מפתח תוכנה, מתכנת)",
+      "passed": false,
+      "evidence": "No transcript.md exists. Cannot verify search queries used."
+    },
+    {
+      "text": "Results include source attribution indicating which site each job came from",
+      "passed": false,
+      "evidence": "No results.md exists. The outputs/ directory is empty."
+    },
+    {
+      "text": "Output includes at least 3 distinct job listings with titles",
+      "passed": false,
+      "evidence": "No results.md exists. The outputs/ directory is empty."
+    }
+  ],
+  "summary": {
+    "passed": 0,
+    "failed": 4,
+    "total": 4,
+    "pass_rate": 0.0
+  },
+  "claims": [],
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "This run produced no output files at all. The outputs/ directory is empty. All assertions fail by default since there is no evidence to evaluate."
+  }
+}

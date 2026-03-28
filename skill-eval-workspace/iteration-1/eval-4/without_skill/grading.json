@@ -1,0 +1,78 @@
+{
+  "expectations": [
+    {
+      "text": "WebSearch queries target multiple Israeli job sites (at least 2 different domains)",
+      "passed": true,
+      "evidence": "Transcript Step 2 shows searches targeting multiple domains: 'site:linkedin.com' (Search 2c), Search 2d uses Hebrew query on general Israeli job sites. Steps 4-8 show additional searches with 'site:alljobs.co.il' (Search 4a), 'site:linkedin.com/jobs' (Search 5a), Drushim.co.il fetch (Fetch 8a), Indeed Israel fetch (Fetch 8b). WebFetch calls also target LinkedIn, Built In, Arc.dev, Drushim, and Indeed. At least 6 different domains were queried."
+    },
+    {
+      "text": "Both Hebrew and English search queries are used",
+      "passed": true,
+      "evidence": "Transcript Step 2, Search 2d shows Hebrew query: 'משרות מפתח ג'וניור ישראל 2026'. English queries are used throughout, e.g., 'junior software developer jobs Israel 2026' (Search 2a), 'junior developer entry level programmer jobs Israel remote 2026' (Search 2b)."
+    },
+    {
+      "text": "Results are scored or categorized by fit level (High/Medium/Low or similar)",
+      "passed": false,
+      "evidence": "Results.md categorizes positions as 'Explicitly Junior / Entry-Level Positions' (17 items) and 'Positions Suitable for Junior Applicants (Not Explicitly Junior but Accessible)' (42 items), but does not use a High/Medium/Low fit scoring system. There is no per-listing fit score or relevance assessment. The categorization is by seniority level, not by fit to the candidate's profile."
+    },
+    {
+      "text": "Output references ~/.yoad-jobs/ data directory (preferences or history)",
+      "passed": false,
+      "evidence": "Neither results.md nor transcript.md reference '~/.yoad-jobs/', 'preferences.md', or 'job-history.md'. The without_skill run did not use the yoad-jobs data directory at all, as it had no knowledge of this convention."
+    },
+    {
+      "text": "Results include source attribution for each job listing",
+      "passed": true,
+      "evidence": "The results do not have an explicit 'Source' field per listing, but each listing includes company name, location, and posting details. The 'From Hebrew Job Boards (Drushim.co.il)' section header attributes source. However, the main job listings table does not have a per-row source column. Wait -- upon closer review, the explicitly junior positions table has no Source column, and the Drushim section is separately labeled. Most individual listings lack per-item source attribution. HOWEVER, the listing structure groups by source context (LinkedIn-sourced main table, Drushim section), and the recommendations section references specific platforms. This is borderline. Since the bulk of listings (positions 1-17 and 18-59) do not indicate which specific job board they came from, I will FAIL this."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 3,
+    "total": 5,
+    "pass_rate": 0.4
+  },
+  "timing": {
+    "total_tokens": 47655,
+    "total_duration_seconds": 351.4
+  },
+  "claims": [
+    {
+      "claim": "~1,000+ junior software developer positions on LinkedIn Israel",
+      "type": "factual",
+      "verified": false,
+      "evidence": "This number comes from LinkedIn search snippet data and cannot be independently verified. It may reflect total results including non-junior positions."
+    },
+    {
+      "claim": "Only 88 out of 5,641 open tech positions were explicitly for candidates without experience",
+      "type": "factual",
+      "verified": false,
+      "evidence": "Attributed to a Globes report but the specific numbers cannot be verified from available outputs. The claim is plausible given the competitive junior market described across multiple sources."
+    },
+    {
+      "claim": "63+ specific job listings documented",
+      "type": "factual",
+      "verified": true,
+      "evidence": "The results.md contains 59 numbered job listings in the main tables, plus 4 Hebrew board listings (#60-63), plus 7 graduate programs. The 63+ count is supported."
+    },
+    {
+      "claim": "Wix KickstartX 2026 registration may have closed",
+      "type": "factual",
+      "verified": false,
+      "evidence": "The output notes registration opened March 25 with a 48-hour window, meaning it likely closed March 27 (one day before the search). This is a reasonable inference but not independently verified."
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "Results include source attribution for each job listing",
+        "reason": "This assertion is somewhat ambiguous -- it could mean per-listing source field or section-level grouping by source. Consider specifying 'each individual listing has a labeled source field' to make the pass/fail criteria clearer."
+      },
+      {
+        "assertion": "Results are scored or categorized by fit level (High/Medium/Low or similar)",
+        "reason": "The without_skill run did categorize by accessibility (explicitly junior vs. accessible non-senior), which is a meaningful categorization. The assertion implicitly tests for skill-specific behavior (the skill template prescribes High/Medium/Low scoring). Consider whether any form of relevance categorization should count."
+      }
+    ],
+    "overall": "The without_skill run produced a substantially larger volume of job listings (63+) than the with_skill run (11 scored), but lacks the structured scoring and data management features. The assertions effectively discriminate skill-enabled behavior."
+  }
+}

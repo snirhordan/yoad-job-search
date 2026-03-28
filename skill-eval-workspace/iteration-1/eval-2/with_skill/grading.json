@@ -1,0 +1,62 @@
+{
+  "expectations": [
+    {
+      "text": "WebSearch is used to query at least 2 different Israeli job board sites (e.g., alljobs.co.il, drushim.co.il, il.indeed.com, janglo.net)",
+      "passed": true,
+      "evidence": "Transcript shows WebSearch queries targeting multiple Israeli job board sites: 'site:alljobs.co.il OR site:drushim.co.il' (Search 1a), 'site:jobmaster.co.il OR site:drushim.co.il' (Search 1b), 'site:alljobs.co.il' (Search 1c), 'site:il.indeed.com OR site:janglo.net' (Search 2a), 'site:gotfriends.co.il OR site:secrettelaviv.com' (Search 2b). At least 6 different Israeli job board sites were targeted."
+    },
+    {
+      "text": "At least one search query contains Hebrew characters (e.g., מפתח תוכנה, מתכנת)",
+      "passed": true,
+      "evidence": "Transcript shows 4 Hebrew-language queries: 'מפתח תוכנה ג'וניור 2026' (Search 1a), 'מתכנת ללא ניסיון' (Search 1b), 'מהנדס תוכנה ג'וניור ישראל דרושים' (Search 1c), 'פול סטאק ג'וניור דרושים תל אביב' (Search 1d)."
+    },
+    {
+      "text": "Results include source attribution indicating which site each job came from",
+      "passed": true,
+      "evidence": "Every job listing in results.md includes a 'Source' field identifying the origin, e.g., 'Source: Secret Tel Aviv', 'Source: GotFriends', 'Source: Drushim', 'Source: AllJobs', 'Source: Indeed IL / Cisco Careers', 'Source: Glassdoor', 'Source: Wellfound'. Company API results are also attributed."
+    },
+    {
+      "text": "Output includes at least 3 distinct job listings with titles",
+      "passed": true,
+      "evidence": "Results.md contains 43+ distinct job listings with specific titles across HIGH-FIT (22 positions), MEDIUM-FIT (17 positions), and Training Programs (4 programs). Examples: 'Junior Software Engineer' (Secret Tel Aviv), 'Junior Java Developer' (Secret Tel Aviv), 'Junior Backend Developer (Python & Django)' (Secret Tel Aviv), 'Junior Full Stack Developer' (GotFriends), 'Junior C/C++ Software Engineer' (Cisco), etc."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_tokens": 54129,
+    "total_duration_seconds": 330.0
+  },
+  "claims": [
+    {
+      "claim": "40+ total unique junior/entry-level positions found",
+      "type": "factual",
+      "verified": true,
+      "evidence": "The results list 22 HIGH-FIT positions, 17 MEDIUM-FIT positions from company APIs, and 4 training programs, totaling 43 items. The 40+ claim is supported."
+    },
+    {
+      "claim": "14 sources searched",
+      "type": "factual",
+      "verified": true,
+      "evidence": "The transcript documents WebSearch queries targeting AllJobs, Drushim, JobMaster, GotFriends, Indeed IL, Secret Tel Aviv, Janglo, LinkedIn, Glassdoor, Built In, Wellfound, Goozali, startup.jobs, plus 9+ Greenhouse API company endpoints. 14+ sources is confirmed."
+    },
+    {
+      "claim": "Salary range NIS 130,843 - 351,887/year based on 159 data points",
+      "type": "factual",
+      "verified": false,
+      "evidence": "This data is attributed to Glassdoor but cannot be independently verified from the outputs. The specific numbers and data point count were extracted from a WebSearch result summary."
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "No assertion checks the quality or actionability of the job listings (e.g., whether apply links are functional, whether the jobs are actually junior-level). The current assertions verify presence and structure but not whether the results would genuinely help a job seeker."
+      }
+    ],
+    "overall": "Assertions are well-chosen for a general search eval. Consider adding a quality check for whether listings are genuinely junior-level."
+  }
+}

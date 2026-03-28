@@ -1,0 +1,27 @@
+{
+  "eval_id": 2,
+  "eval_name": "israel-jobs-general-search",
+  "prompt": "search for junior software developer jobs in Israel across all the Israeli job boards. yoad just graduated and has no preference on tech stack",
+  "assertions": [
+    {
+      "text": "WebSearch is used to query at least 2 different Israeli job board sites (e.g., alljobs.co.il, drushim.co.il, il.indeed.com, janglo.net)",
+      "type": "process",
+      "verifiable_by": "transcript"
+    },
+    {
+      "text": "At least one search query contains Hebrew characters (e.g., מפתח תוכנה, מתכנת)",
+      "type": "process",
+      "verifiable_by": "transcript"
+    },
+    {
+      "text": "Results include source attribution indicating which site each job came from",
+      "type": "content",
+      "verifiable_by": "output"
+    },
+    {
+      "text": "Output includes at least 3 distinct job listings with titles",
+      "type": "content",
+      "verifiable_by": "output"
+    }
+  ]
+}

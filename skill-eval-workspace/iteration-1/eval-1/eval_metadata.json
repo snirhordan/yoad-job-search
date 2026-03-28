@@ -1,0 +1,32 @@
+{
+  "eval_id": 1,
+  "eval_name": "israel-jobs-specific-company",
+  "prompt": "my brother yoad just graduated CS and is looking for his first dev job. can you check if fireblocks has any open positions? he's based in israel",
+  "assertions": [
+    {
+      "text": "The output fetches data from the Fireblocks Greenhouse API endpoint (boards-api.greenhouse.io/v1/boards/fireblocks/jobs)",
+      "type": "process",
+      "verifiable_by": "transcript"
+    },
+    {
+      "text": "Results include specific job titles (not just 'jobs available')",
+      "type": "content",
+      "verifiable_by": "output"
+    },
+    {
+      "text": "Results include apply URLs or links for individual positions",
+      "type": "content",
+      "verifiable_by": "output"
+    },
+    {
+      "text": "Results mention location information for jobs",
+      "type": "content",
+      "verifiable_by": "output"
+    },
+    {
+      "text": "Output is formatted as a readable list or table (not raw JSON)",
+      "type": "format",
+      "verifiable_by": "output"
+    }
+  ]
+}

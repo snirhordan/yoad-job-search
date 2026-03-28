@@ -1,0 +1,63 @@
+{
+  "expectations": [
+    {
+      "text": "The output fetches data from the Fireblocks Greenhouse API endpoint (boards-api.greenhouse.io/v1/boards/fireblocks/jobs)",
+      "passed": false,
+      "evidence": "Transcript shows the agent used curl to fetch 'https://www.fireblocks.com/careers/' and 'https://boards.greenhouse.io/fireblocks' (the HTML board page), not the JSON API endpoint 'boards-api.greenhouse.io/v1/boards/fireblocks/jobs'. The agent scraped the HTML page with grep and Python parsing rather than using the dedicated API."
+    },
+    {
+      "text": "Results include specific job titles (not just 'jobs available')",
+      "passed": true,
+      "evidence": "Results.md lists 9 specific job titles with detailed information, e.g., 'Technical Integration Engineer', 'Senior Software Engineer, Transaction Security', 'Senior Backend Engineer, Key Management', 'Senior C++ Engineer, Key Management', etc."
+    },
+    {
+      "text": "Results include apply URLs or links for individual positions",
+      "passed": true,
+      "evidence": "Every listed position includes a Greenhouse apply URL, e.g., 'https://job-boards.greenhouse.io/fireblocks/jobs/4656817006' for the Technical Integration Engineer, and similar URLs for all 9 positions."
+    },
+    {
+      "text": "Results mention location information for jobs",
+      "passed": true,
+      "evidence": "All positions include 'Location: Tel Aviv-Yafo, Israel' or 'Department' information. The Senior Compliance Associate notes 'Tel Aviv-Yafo, Israel' in the Legal & Compliance department."
+    },
+    {
+      "text": "Output is formatted as a readable list or table (not raw JSON)",
+      "passed": true,
+      "evidence": "Results are formatted as a numbered Markdown list with structured fields (Location, Department, Published, Apply, Note) under each job title. No raw JSON in output."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 1,
+    "total": 5,
+    "pass_rate": 0.8
+  },
+  "timing": {
+    "total_tokens": 21893,
+    "total_duration_seconds": 110.5
+  },
+  "claims": [
+    {
+      "claim": "50 total open positions at Fireblocks",
+      "type": "factual",
+      "verified": false,
+      "evidence": "The with_skill run (same date) found 65 positions via the API. The without_skill run found 50 via HTML scraping. The discrepancy suggests the HTML page may not expose all positions, or the scraping missed some. The API data is likely more authoritative."
+    },
+    {
+      "claim": "9 Israel-based positions (8 in R&D, 1 in Legal & Compliance)",
+      "type": "factual",
+      "verified": false,
+      "evidence": "The with_skill run found 17 Israel-based positions. The without_skill run found only 9. The HTML scraping approach missed 8 positions compared to the API, suggesting incomplete extraction."
+    },
+    {
+      "claim": "Technical Integration Engineer is the best match for a new grad",
+      "type": "quality",
+      "verified": true,
+      "evidence": "Both with_skill and without_skill runs agree that Technical Integration Engineer is the most promising role for a new grad, as it lacks the 'Senior' prefix."
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "The failed assertion correctly identifies the key difference: without the skill, the agent didn't know about the Greenhouse JSON API and instead scraped HTML, finding fewer jobs (50 vs 65). The assertions effectively differentiate skill-enabled vs. generic behavior."
+  }
+}

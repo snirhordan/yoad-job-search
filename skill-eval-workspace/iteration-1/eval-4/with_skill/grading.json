@@ -1,0 +1,63 @@
+{
+  "expectations": [
+    {
+      "text": "WebSearch queries target multiple Israeli job sites (at least 2 different domains)",
+      "passed": true,
+      "evidence": "Transcript Step 2 documents 11 WebSearch queries targeting multiple domains: 'site:il.indeed.com' (Search 1), 'site:janglo.net OR site:secrettelaviv.com' (Search 2), 'site:wellfound.com OR site:startup.jobs' (Search 3), 'site:goozali.com' (Search 4), 'site:alljobs.co.il' (Search 5), 'site:drushim.co.il' (Search 6), 'site:jobmaster.co.il' (Search 7), 'site:gotfriends.co.il' (Search 8). At least 8 different Israeli job site domains were targeted."
+    },
+    {
+      "text": "Both Hebrew and English search queries are used",
+      "passed": true,
+      "evidence": "Transcript Step 2 shows English searches (e.g., 'junior software developer Israel site:il.indeed.com 2026') and Hebrew searches (e.g., 'מפתח תוכנה ג'וניור site:alljobs.co.il', 'מתכנת OR מפתח תוכנה ללא ניסיון site:drushim.co.il'). Both languages clearly used."
+    },
+    {
+      "text": "Results are scored or categorized by fit level (High/Medium/Low or similar)",
+      "passed": true,
+      "evidence": "Results.md categorizes all positions with explicit fit ratings: 'Fit: High' for 5 positions (e.g., 'Junior Full Stack Developer at Financial Trading Portal'), 'Fit: Medium' for 6 positions (e.g., 'Junior Developer (E-commerce) at Startup'). The summary table shows 'High-fit matches: 5, Medium-fit matches: 6, Low-fit / Skipped: ~20'."
+    },
+    {
+      "text": "Output references ~/.yoad-jobs/ data directory (preferences or history)",
+      "passed": true,
+      "evidence": "Transcript Step 0 states: 'Verified ~/.yoad-jobs/preferences.md exists' and 'Verified ~/.yoad-jobs/job-history.md exists'. Step 1 confirms reading preferences and job history. Step 6 documents appending to '~/.yoad-jobs/job-history.md'. Results.md also references preferences in the Scoring section."
+    },
+    {
+      "text": "Results include source attribution for each job listing",
+      "passed": true,
+      "evidence": "Every job listing in results.md includes a 'Source' field: e.g., 'Source: GotFriends (Job #120707)', 'Source: Drushim', 'Source: Built In', 'Source: AllJobs', 'Source: Wix Careers'. All 11 scored jobs have source attribution."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_tokens": 39421,
+    "total_duration_seconds": 252.5
+  },
+  "claims": [
+    {
+      "claim": "30+ unique job leads identified after deduplication",
+      "type": "factual",
+      "verified": false,
+      "evidence": "The results.md presents 11 scored jobs (5 High + 6 Medium) and mentions '~20 Low-fit / Skipped'. The total of ~31 is consistent with the '30+' claim, but only 11 are presented in detail."
+    },
+    {
+      "claim": "LinkedIn reports 150 junior developer jobs in Israel (126 in Tel Aviv alone)",
+      "type": "factual",
+      "verified": false,
+      "evidence": "These numbers are attributed to LinkedIn via WebSearch but cannot be independently verified from available outputs. The specific counts came from search result snippets."
+    },
+    {
+      "claim": "GotFriends was the most productive source for specific junior job listings",
+      "type": "quality",
+      "verified": true,
+      "evidence": "Transcript Step 2 (Search 8) found 5 distinct junior developer postings from GotFriends, and 3 of the 5 High-fit results in the final output came from GotFriends. This supports the claim."
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "Assertions are comprehensive and well-balanced, covering process (search breadth, language diversity), content (scoring, source attribution), and data management (preferences directory). No gaps identified."
+  }
+}

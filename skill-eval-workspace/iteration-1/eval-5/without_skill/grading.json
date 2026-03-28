@@ -1,0 +1,72 @@
+{
+  "expectations": [
+    {
+      "text": "The keyword 'Python' appears in the WebSearch queries",
+      "passed": true,
+      "evidence": "Transcript Step 1 shows all 4 initial queries contain 'Python': 'Python developer jobs Tel Aviv Israel 2026 junior entry level' (Query 1), 'Python developer jobs Israel site:linkedin.com 2026' (Query 2), 'Python developer jobs Tel Aviv site:alljobs.co.il OR site:drushim.co.il OR site:jobmaster.co.il' (Query 3), 'מפתח Python תל אביב דרושים 2026' (Query 4). Python appears consistently throughout all search steps."
+    },
+    {
+      "text": "WebSearch queries target Israeli job board sites (alljobs, drushim, indeed il, etc.)",
+      "passed": true,
+      "evidence": "Transcript Step 1, Query 3 explicitly targets 'site:alljobs.co.il OR site:drushim.co.il OR site:jobmaster.co.il'. Step 3 includes WebFetch of Drushim (drushim.co.il/jobs/search/junior%20python/) and AllJobs (alljobs.co.il). Step 4 fetches GotFriends (gotfriends.co.il/jobslobby/software/python-developer/). Multiple Israeli job board sites targeted."
+    },
+    {
+      "text": "Results are relevant to Python development roles (Python mentioned in listings)",
+      "passed": true,
+      "evidence": "All 18 specific job listings in results.md are Python-relevant: 'Junior Developer - Blueprint Software' (Python track), 'Python Developer - Sharpies', 'Python Developer - Dreamhub', 'Python Developer - Tondo', 'Python Automation Developer - Ness Technologies', 'Python Developer (Cybersecurity, No Experience Required)', 'Automation Developer (Python)', 'Backend Developer (Python) - OriginAI', 'Software Engineer (Python) - Sett', 'Full Stack Python Developer - Ingima', 'Python Developer - LLM & MCP Integration - Fortinet', etc. Python is the consistent theme."
+    },
+    {
+      "text": "Output includes fit scoring or relevance assessment for each result",
+      "passed": false,
+      "evidence": "Results.md categorizes listings into 'Entry-Level / Junior-Friendly Positions' (7 items), 'Mid-Level Positions (Reachable with Strong Portfolio)' (7 items), and 'Senior Positions (For Future Reference)' (4 items). While this is a form of categorization, there is no explicit fit scoring (High/Medium/Low) or per-listing relevance assessment with ratings. The sections describe seniority bands, not fit scores for the candidate. No 'Fit: High' or similar labeling appears."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 1,
+    "total": 4,
+    "pass_rate": 0.75
+  },
+  "timing": {
+    "total_tokens": 32841,
+    "total_duration_seconds": 218.4
+  },
+  "claims": [
+    {
+      "claim": "831+ Python Developer Jobs in Israel, 426 in Tel Aviv",
+      "type": "factual",
+      "verified": false,
+      "evidence": "Numbers attributed to LinkedIn data extracted via WebFetch. Cannot be independently verified but are cited consistently across transcript and results."
+    },
+    {
+      "claim": "Entry-level salary NIS 20,000-26,000/month",
+      "type": "factual",
+      "verified": false,
+      "evidence": "Salary data attributed to GotFriends page fetch but cannot be independently verified. The range is plausible for Israeli tech market."
+    },
+    {
+      "claim": "Average salary NIS 23,875/year from Glassdoor",
+      "type": "factual",
+      "verified": false,
+      "evidence": "This number seems implausibly low (NIS 23,875/year would be about NIS 2,000/month). This is likely a data extraction error or Glassdoor may be reporting a different metric. For comparison, the with_skill run reports ~ILS 265,000/year, which is far more realistic. This claim appears incorrect."
+    },
+    {
+      "claim": "732 total Python positions on GotFriends",
+      "type": "factual",
+      "verified": false,
+      "evidence": "Cited from the GotFriends page fetch in the transcript. Cannot be independently verified but is a specific number from the fetched page."
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "Output includes fit scoring or relevance assessment for each result",
+        "reason": "The without_skill run organized results by seniority tier (Entry-Level, Mid-Level, Senior) which provides useful structure, but doesn't include per-listing fit scores. The assertion tests for a skill-specific behavior pattern. Consider whether seniority-based categorization should partially satisfy this -- currently it's a clear fail because there are no scores, but the output is still meaningfully organized."
+      },
+      {
+        "reason": "The results.md contains a suspicious salary figure ('NIS 23,875/year') that is clearly wrong for a developer salary in Israel. No assertion catches data quality issues like this. Consider adding an assertion that checks for plausible salary data when salary information is included."
+      }
+    ],
+    "overall": "Assertions effectively discriminate on the fit-scoring dimension. The without_skill run found a comparable number of listings but lacks the structured scoring. Notable data quality issue with the salary figure went uncaught by assertions."
+  }
+}

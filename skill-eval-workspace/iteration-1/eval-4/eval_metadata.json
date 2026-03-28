@@ -1,0 +1,32 @@
+{
+  "eval_id": 4,
+  "eval_name": "job-search-il-default",
+  "prompt": "run a broad job search across Israeli sites for yoad. he's a recent CS graduate looking for any junior dev role in israel or remote. no specific tech stack preference",
+  "assertions": [
+    {
+      "text": "WebSearch queries target multiple Israeli job sites (at least 2 different domains)",
+      "type": "process",
+      "verifiable_by": "transcript"
+    },
+    {
+      "text": "Both Hebrew and English search queries are used",
+      "type": "process",
+      "verifiable_by": "transcript"
+    },
+    {
+      "text": "Results are scored or categorized by fit level (High/Medium/Low or similar)",
+      "type": "content",
+      "verifiable_by": "output"
+    },
+    {
+      "text": "Output references ~/.yoad-jobs/ data directory (preferences or history)",
+      "type": "process",
+      "verifiable_by": "transcript"
+    },
+    {
+      "text": "Results include source attribution for each job listing",
+      "type": "content",
+      "verifiable_by": "output"
+    }
+  ]
+}

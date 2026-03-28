@@ -1,0 +1,58 @@
+{
+  "expectations": [
+    {
+      "text": "The keyword 'Python' appears in the WebSearch queries",
+      "passed": true,
+      "evidence": "Transcript Step 2 documents 8 parallel WebSearch queries, all containing 'Python': e.g., '\"Python developer\" Israel site:il.indeed.com' (Query 1), '\"Python developer\" Israel site:janglo.net OR site:secrettelaviv.com' (Query 2), '\"Python developer\" OR \"מפתח Python\" site:drushim.co.il' (Query 6), '\"Python developer\" site:gotfriends.co.il' (Query 8). Python appears in all 8 primary queries."
+    },
+    {
+      "text": "WebSearch queries target Israeli job board sites (alljobs, drushim, indeed il, etc.)",
+      "passed": true,
+      "evidence": "Transcript Step 2 shows site-specific queries targeting: 'site:il.indeed.com' (Query 1), 'site:secrettelaviv.com' (Query 2), 'site:wellfound.com OR site:startup.jobs' (Query 3), 'site:goozali.com' (Query 4), 'site:alljobs.co.il' (Query 5), 'site:drushim.co.il' (Query 6), 'site:jobmaster.co.il' (Query 7), 'site:gotfriends.co.il' (Query 8). All major Israeli job boards covered."
+    },
+    {
+      "text": "Results are relevant to Python development roles (Python mentioned in listings)",
+      "passed": true,
+      "evidence": "All 12 scored positions in results.md are Python-relevant: 'Junior Backend Developer (Python & Django)', 'Python Developer (1-2 years exp)', 'Junior Python Developer at Contentsquare', 'Python Developer at BlueVine', 'Python Automation Developer', 'Software Engineer (Python)', 'Full Stack Python Developer (NodeJS/Python/VueJS)', 'Data Science Python Developer'. The 10 skipped positions also mention Python (e.g., 'Senior Python Developer', 'Senior Python Backend Developer'). Python is central to every listing."
+    },
+    {
+      "text": "Output includes fit scoring or relevance assessment for each result",
+      "passed": true,
+      "evidence": "Every scored position in results.md has an explicit 'Fit' field: Positions 1-5 are 'Fit: High', positions 6-12 are 'Fit: Medium'. Each also has a 'Why' section explaining the relevance. Skipped positions are labeled 'Skip' with a reason (e.g., 'Senior-level', '7+ years required'). Summary table shows 'High fit: 5, Medium fit: 7, Skipped: 10'."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_tokens": 36697,
+    "total_duration_seconds": 200.4
+  },
+  "claims": [
+    {
+      "claim": "22 unique positions found across 8 Israeli job sites",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Results.md lists 5 High-fit + 7 Medium-fit + 10 Skipped = 22 positions. Sources listed: Indeed IL, Secret Tel Aviv, Wellfound, Startup.jobs, Goozali, AllJobs, Drushim, JobMaster, GotFriends (9 sites, actually). The count is consistent."
+    },
+    {
+      "claim": "Average Python Developer salary in Israel is ~ILS 265,000/year",
+      "type": "factual",
+      "verified": false,
+      "evidence": "Attributed to Glassdoor data but cannot be independently verified from available outputs."
+    },
+    {
+      "claim": "25% of Python developer listings are junior-friendly",
+      "type": "quality",
+      "verified": false,
+      "evidence": "The transcript states 'roughly 25% of Python developer listings are junior-friendly.' With 5 high-fit and 7 medium-fit out of 22 total (55%), this percentage seems to apply to a broader pool beyond the 22 curated listings. The specific ratio is unverifiable."
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "Assertions are well-targeted for a keyword-specific search eval. They verify the keyword is used, relevant sites are queried, results are on-topic, and scoring is present. No gaps identified."
+  }
+}

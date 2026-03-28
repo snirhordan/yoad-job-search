@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eval Review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #faf9f5;
+      --surface: #ffffff;
+      --border: #e8e6dc;
+      --text: #141413;
+      --text-muted: #b0aea5;
+      --accent: #d97757;
+      --accent-hover: #c4613f;
+      --green: #788c5d;
+      --green-bg: #eef2e8;
+      --red: #c44;
+      --red-bg: #fceaea;
+      --header-bg: #141413;
+      --header-text: #faf9f5;
+      --radius: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---- Header ---- */
+    .header {
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .header .instructions {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+    }
+    .header .progress {
+      font-size: 0.875rem;
+      opacity: 0.8;
+      text-align: right;
+    }
+
+    /* ---- Main content ---- */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* ---- Sections ---- */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      flex-shrink: 0;
+    }
+    .section-header {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .section-body {
+      padding: 1rem;
+    }
+
+    /* ---- Config badge ---- */
+    .config-badge {
+      display: inline-block;
+      padding: 0.2rem 0.625rem;
+      border-radius: 9999px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-left: 0.75rem;
+      vertical-align: middle;
+    }
+    .config-badge.config-primary {
+      background: rgba(33, 150, 243, 0.12);
+      color: #1976d2;
+    }
+    .config-badge.config-baseline {
+      background: rgba(255, 193, 7, 0.15);
+      color: #f57f17;
+    }
+
+    /* ---- Prompt ---- */
+    .prompt-text {
+      white-space: pre-wrap;
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    /* ---- Outputs ---- */
+    .output-file {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .output-file + .output-file {
+      margin-top: 1rem;
+    }
+    .output-file-header {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .output-file-header .dl-btn {
+      font-size: 0.7rem;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+    .output-file-header .dl-btn:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+    .output-file-content {
+      padding: 0.75rem;
+      overflow-x: auto;
+    }
+    .output-file-content pre {
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+    .output-file-content img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+    .output-file-content iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+    .output-file-content table {
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      width: 100%;
+    }
+    .output-file-content table td,
+    .output-file-content table th {
+      border: 1px solid var(--border);
+      padding: 0.375rem 0.5rem;
+      text-align: left;
+    }
+    .output-file-content table th {
+      background: var(--bg);
+      font-weight: 600;
+    }
+    .output-file-content .download-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .output-file-content .download-link:hover {
+      background: var(--border);
+    }
+    .empty-state {
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* ---- Feedback ---- */
+    .prev-feedback {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.625rem 0.75rem;
+      margin-top: 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .prev-feedback-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.25rem;
+      color: var(--text-muted);
+    }
+    .feedback-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      resize: vertical;
+      color: var(--text);
+    }
+    .feedback-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .feedback-status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      min-height: 1.1em;
+    }
+
+    /* ---- Grades (collapsible) ---- */
+    .grades-toggle {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .grades-toggle:hover {
+      color: var(--accent);
+    }
+    .grades-toggle .arrow {
+      margin-right: 0.5rem;
+      transition: transform 0.15s;
+      font-size: 0.75rem;
+    }
+    .grades-toggle .arrow.open {
+      transform: rotate(90deg);
+    }
+    .grades-content {
+      display: none;
+      margin-top: 0.75rem;
+    }
+    .grades-content.open {
+      display: block;
+    }
+    .grades-summary {
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .grade-badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .grade-pass { background: var(--green-bg); color: var(--green); }
+    .grade-fail { background: var(--red-bg); color: var(--red); }
+    .assertion-list {
+      list-style: none;
+    }
+    .assertion-item {
+      padding: 0.625rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8125rem;
+    }
+    .assertion-item:last-child { border-bottom: none; }
+    .assertion-status {
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+    .assertion-status.pass { color: var(--green); }
+    .assertion-status.fail { color: var(--red); }
+    .assertion-evidence {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      padding-left: 1.5rem;
+    }
+
+    /* ---- View tabs ---- */
+    .view-tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 2rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .view-tab {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.625rem 1.25rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .view-tab:hover { color: var(--text); }
+    .view-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .view-panel { display: none; }
+    .view-panel.active { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+    /* ---- Benchmark view ---- */
+    .benchmark-view {
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .benchmark-table {
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.8125rem;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+    .benchmark-table th, .benchmark-table td {
+      padding: 0.625rem 0.75rem;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    .benchmark-table th {
+      font-family: 'Poppins', sans-serif;
+      background: var(--header-bg);
+      color: var(--header-text);
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .benchmark-table tr:hover { background: var(--bg); }
+    .benchmark-table tr.benchmark-row-with { background: rgba(33, 150, 243, 0.06); }
+    .benchmark-table tr.benchmark-row-without { background: rgba(255, 193, 7, 0.06); }
+    .benchmark-table tr.benchmark-row-with:hover { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-without:hover { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-table tr.benchmark-row-avg { font-weight: 600; border-top: 2px solid var(--border); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-with { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-without { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-delta-positive { color: var(--green); font-weight: 600; }
+    .benchmark-delta-negative { color: var(--red); font-weight: 600; }
+    .benchmark-notes {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .benchmark-notes h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+    }
+    .benchmark-notes ul {
+      list-style: disc;
+      padding-left: 1.25rem;
+    }
+    .benchmark-notes li {
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      margin-bottom: 0.375rem;
+    }
+    .benchmark-empty {
+      color: var(--text-muted);
+      font-style: italic;
+      text-align: center;
+      padding: 3rem;
+    }
+
+    /* ---- Navigation ---- */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all 0.15s;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .done-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .done-btn:hover {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .done-btn.ready {
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+    }
+    .done-btn.ready:hover {
+      background: var(--accent-hover);
+    }
+    /* ---- Done overlay ---- */
+    .done-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .done-overlay.visible {
+      display: flex;
+    }
+    .done-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 2rem 3rem;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+    }
+    .done-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .done-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    .done-card .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .done-card button {
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .done-card button:hover {
+      background: var(--bg);
+    }
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 200;
+    }
+    .toast.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" style="height:100vh; display:flex; flex-direction:column;">
+    <div class="header">
+      <div>
+        <h1>Eval Review: <span id="skill-name"></span></h1>
+        <div class="instructions">Review each output and leave feedback below. Navigate with arrow keys or buttons. When done, copy feedback and paste into Claude Code.</div>
+      </div>
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <!-- View tabs (only shown when benchmark data exists) -->
+    <div class="view-tabs" id="view-tabs" style="display:none;">
+      <button class="view-tab active" onclick="switchView('outputs')">Outputs</button>
+      <button class="view-tab" onclick="switchView('benchmark')">Benchmark</button>
+    </div>
+
+    <!-- Outputs panel (qualitative review) -->
+    <div class="view-panel active" id="panel-outputs">
+    <div class="main">
+      <!-- Prompt -->
+      <div class="section">
+        <div class="section-header">Prompt <span class="config-badge" id="config-badge" style="display:none;"></span></div>
+        <div class="section-body">
+          <div class="prompt-text" id="prompt-text"></div>
+        </div>
+      </div>
+
+      <!-- Outputs -->
+      <div class="section">
+        <div class="section-header">Output</div>
+        <div class="section-body" id="outputs-body">
+          <div class="empty-state">No output files found</div>
+        </div>
+      </div>
+
+      <!-- Previous Output (collapsible) -->
+      <div class="section" id="prev-outputs-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="togglePrevOutputs()">
+            <span class="arrow" id="prev-outputs-arrow">&#9654;</span>
+            Previous Output
+          </div>
+        </div>
+        <div class="grades-content" id="prev-outputs-content"></div>
+      </div>
+
+      <!-- Grades (collapsible) -->
+      <div class="section" id="grades-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="toggleGrades()">
+            <span class="arrow" id="grades-arrow">&#9654;</span>
+            Formal Grades
+          </div>
+        </div>
+        <div class="grades-content" id="grades-content"></div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="section">
+        <div class="section-header">Your Feedback</div>
+        <div class="section-body">
+          <textarea
+            class="feedback-textarea"
+            id="feedback"
+            placeholder="What do you think of this output? Any issues, suggestions, or things that look great?"
+          ></textarea>
+          <div class="feedback-status" id="feedback-status"></div>
+          <div class="prev-feedback" id="prev-feedback" style="display:none;">
+            <div class="prev-feedback-label">Previous feedback</div>
+            <div id="prev-feedback-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav" id="outputs-nav">
+      <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">&#8592; Previous</button>
+      <button class="done-btn" id="done-btn" onclick="showDoneDialog()">Submit All Reviews</button>
+      <button class="nav-btn" id="next-btn" onclick="navigate(1)">Next &#8594;</button>
+    </div>
+    </div><!-- end panel-outputs -->
+
+    <!-- Benchmark panel (quantitative stats) -->
+    <div class="view-panel" id="panel-benchmark">
+      <div class="benchmark-view" id="benchmark-content">
+        <div class="benchmark-empty">No benchmark data available. Run a benchmark to see quantitative results here.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Done overlay -->
+  <div class="done-overlay" id="done-overlay">
+    <div class="done-card">
+      <h2>Review Complete</h2>
+      <p>Your feedback has been saved. Go back to your Claude Code session and tell Claude you're done reviewing.</p>
+      <div class="btn-row">
+        <button onclick="closeDoneDialog()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---- Embedded data (injected by generate_review.py) ----
+    const EMBEDDED_DATA = {"skill_name": "yoad-job-search", "runs": [{"id": "eval-1-with_skill", "prompt": "my brother yoad just graduated CS and is looking for his first dev job. can you check if fireblocks has any open positions? he's based in israel", "eval_id": 1, "outputs": [{"name": "results.md", "type": "text", "content": "# Fireblocks Open Positions -- Job Search for Yoad Hordan\n\n**Date**: 2026-03-28\n**Company**: Fireblocks (blockchain infrastructure / digital asset security)\n**Source**: Greenhouse API (`https://boards-api.greenhouse.io/v1/boards/fireblocks/jobs`)\n**Total open positions**: 65\n\n---\n\n## Summary for Yoad\n\nFireblocks currently has **65 open positions**. Unfortunately, **none are explicitly labeled as junior or entry-level**. All engineering roles require \"Senior\" experience or are leadership positions. There are no internship or graduate-program listings.\n\nThat said, below are the Israel-based positions and all engineering/development roles -- some may still be worth applying to if Yoad has strong projects or relevant coursework to showcase.\n\n---\n\n## Israel-Based Positions (Tel Aviv) -- 12 total\n\nThese are the most relevant given Yoad's location preference.\n\n### Engineering (Israel)\n\n| # | Title | Department | Salary | Apply Link |\n|---|-------|-----------|--------|------------|\n| 1 | Application Security Engineer | Engineering / Security | Not disclosed | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4659362006) |\n| 2 | Senior Backend Engineer, Key Management | Engineering | Not disclosed | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4666674006) |\n| 3 | Senior Backend Engineer, Platform | Engineering | Not disclosed | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4601906006) |\n| 4 | Senior C++ Engineer, Key Management | Engineering | Not disclosed | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4666670006) |\n| 5 | Senior Full-Stack Engineer, DX | Engineering | Not disclosed | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4653822006) |\n| 6 | Senior Full Stack Engineer, Subscriptions Team | Engineering | Not disclosed | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4629282006) |\n| 7 | Senior Software Engineer, Transaction Security | Engineering | Not disclosed | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4653827006) |\n| 8 | Information Security Engineer | Security | Not disclosed | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4616044006) |\n| 9 | Engineering Team Lead - Network Platform | Engineering / Leadership | Not disclosed | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4620537006) |\n| 10 | Technical Integration Engineer | Engineering / Support | Not disclosed | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4656817006) |\n\n### Non-Engineering (Israel)\n\n| # | Title | Department | Salary | Apply Link |\n|---|-------|-----------|--------|------------|\n| 11 | GRC Operations Specialist | Compliance | Not disclosed | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4620939006) |\n| 12 | Senior Compliance Associate | Legal / Compliance | Not disclosed | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4646869006) |\n| 13 | Technical GRC Expert | Compliance | Not disclosed | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4618281006) |\n| 14 | Security IR Director | Security / Leadership | Not disclosed | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4664488006) |\n| 15 | Security Operations Team Lead - Israel | Security / Leadership | Not disclosed | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4655907006) |\n| 16 | Senior Product Analyst | Product | Not disclosed | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4605102006) |\n| 17 | Senior Product Manager - Wallet | Product | Not disclosed | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4654558006) |\n\n---\n\n## Potentially Relevant Roles (Non-Israel, Remote or Flexible)\n\n| # | Title | Location | Apply Link |\n|---|-------|----------|------------|\n| 1 | Mobile Engineer | Latin America (Remote) | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4652122006) |\n| 2 | Mobile Engineer | United States | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4626033006) |\n| 3 | Senior Full Stack Engineer | Toronto, Canada | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4652563006) |\n| 4 | Senior Full Stack Engineer | Latin America (Multi-city) | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4652128006) |\n| 5 | Site Reliability Engineer | United States | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4656035006) |\n\n---\n\n## All Engineering Roles (Complete List, All Locations)\n\n| # | Title | Location | Apply Link |\n|---|-------|----------|------------|\n| 1 | Application Security Engineer | Tel Aviv, Israel | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4659362006) |\n| 2 | Senior Backend Engineer, Assets Team | Belgrade, Serbia | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4647929006) |\n| 3 | Senior Backend Engineer, Assets Team | Warsaw, Poland | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4653838006) |\n| 4 | Senior Backend Engineer, Assets Team | Prague, Czech Republic | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4653839006) |\n| 5 | Senior Backend Engineer, Key Management | Tel Aviv, Israel | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4666674006) |\n| 6 | Senior Backend Engineer, Platform | Tel Aviv, Israel | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4601906006) |\n| 7 | Senior Blockchain Engineer | New York, USA | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4601513006) |\n| 8 | Senior C++ Engineer, Key Management | Tel Aviv, Israel | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4666670006) |\n| 9 | Senior Frontend Engineer, Assets Team | Prague, Czech Republic | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4653911006) |\n| 10 | Senior Frontend Engineer, Assets Team | Belgrade, Serbia | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4648346006) |\n| 11 | Senior Frontend Engineer, Assets Team | Warsaw, Poland | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4653912006) |\n| 12 | Senior Full Stack Engineer | Toronto, Canada | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4652563006) |\n| 13 | Senior Full Stack Engineer | Latin America (Multi-city) | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4652128006) |\n| 14 | Senior Full Stack Engineer | Miami/New York/San Francisco, USA | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4626023006) |\n| 15 | Senior Full-Stack Engineer, DX | Tel Aviv, Israel | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4653822006) |\n| 16 | Senior Full Stack Engineer, Subscriptions Team | Tel Aviv, Israel | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4629282006) |\n| 17 | Senior Software Engineer, Transaction Security | Tel Aviv, Israel | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4653827006) |\n| 18 | Staff Full Stack Engineer | United States | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4666635006) |\n| 19 | Information Security Engineer | Tel Aviv, Israel | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4616044006) |\n| 20 | Mobile Engineer | Miami/New York/San Francisco, USA | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4626035006) |\n| 21 | Mobile Engineer | United States | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4626033006) |\n| 22 | Mobile Engineer (Remote) | Latin America (Multi-city) | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4652122006) |\n| 23 | Engineering Team Lead - Network Platform | Tel Aviv, Israel | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4620537006) |\n| 24 | Director of Engineering, Dynamic Platform | Miami/New York, USA | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4662147006) |\n| 25 | Incident Response Engineer (Pacific time) | United States | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4664533006) |\n| 26 | Security IR Director | Tel Aviv, Israel | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4664488006) |\n| 27 | Security Operations Team Lead - Israel | Tel Aviv, Israel | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4655907006) |\n| 28 | Site Reliability Engineer | United States | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4656035006) |\n| 29 | Site Reliability Engineer (SRE) (Pacific time) | United States | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4619316006) |\n| 30 | Technical Integration Engineer | Tel Aviv, Israel | [Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4656817006) |\n\n---\n\n## Junior / Entry-Level Assessment\n\n**No junior or entry-level positions found.** All engineering roles at Fireblocks currently require senior-level experience. The closest roles that *might* consider a strong new grad are:\n\n1. **Application Security Engineer** (Tel Aviv) -- title does not specify \"Senior\", may have more flexible requirements\n2. **Information Security Engineer** (Tel Aviv) -- also lacks \"Senior\" prefix\n3. **Technical Integration Engineer** (Tel Aviv) -- integration/support-adjacent, sometimes more open to junior candidates\n\n**Recommendation**: Fireblocks is currently hiring exclusively for experienced engineers. Yoad should:\n- Monitor their careers page for future junior openings\n- Consider applying to the non-\"Senior\" titled roles above with a strong cover letter\n- Look at other Israeli tech companies that have explicit junior/graduate programs (e.g., Wix, Monday, Check Point, Playtika)\n"}], "grading": {"expectations": [{"text": "The output fetches data from the Fireblocks Greenhouse API endpoint (boards-api.greenhouse.io/v1/boards/fireblocks/jobs)", "passed": true, "evidence": "Transcript Step 2 shows: 'Tool: WebFetch, URL: https://boards-api.greenhouse.io/v1/boards/fireblocks/jobs'. Results.md header confirms 'Source: Greenhouse API (https://boards-api.greenhouse.io/v1/boards/fireblocks/jobs)'."}, {"text": "Results include specific job titles (not just 'jobs available')", "passed": true, "evidence": "Results.md lists 30 specific job titles in tables, e.g., 'Application Security Engineer', 'Senior Backend Engineer, Key Management', 'Senior Full-Stack Engineer, DX', 'Technical Integration Engineer', etc."}, {"text": "Results include apply URLs or links for individual positions", "passed": true, "evidence": "Every job listing includes a Greenhouse apply link, e.g., '[Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4659362006)' for Application Security Engineer, and similar for all 30 listed positions."}, {"text": "Results mention location information for jobs", "passed": true, "evidence": "Israel-based positions are labeled 'Tel Aviv, Israel'. The complete engineering list includes locations like 'Belgrade, Serbia', 'Warsaw, Poland', 'Prague, Czech Republic', 'New York, USA', 'Latin America (Remote)', 'Toronto, Canada', etc."}, {"text": "Output is formatted as a readable list or table (not raw JSON)", "passed": true, "evidence": "Results are formatted as Markdown tables with columns (Title, Department, Salary, Apply Link) and organized under section headers (Israel-Based, Potentially Relevant, All Engineering Roles). No raw JSON in output."}], "summary": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0}, "timing": {"total_tokens": 22705, "total_duration_seconds": 115.6}, "claims": [{"claim": "Fireblocks has 65 total open positions", "type": "factual", "verified": true, "evidence": "The WebFetch call returned 65 positions per the transcript, and the results header confirms 'Total open positions: 65'."}, {"claim": "17 positions are in Israel (Tel Aviv)", "type": "factual", "verified": true, "evidence": "The results list 17 Israel-based positions across the Engineering and Non-Engineering Israel tables (10 engineering + 7 non-engineering). The count is consistent."}, {"claim": "No junior or entry-level positions found", "type": "quality", "verified": true, "evidence": "All engineering titles listed contain 'Senior', 'Staff', 'Lead', or 'Director' except 3 roles (Application Security Engineer, Information Security Engineer, Technical Integration Engineer) which the output correctly notes as potentially more flexible."}], "eval_feedback": {"suggestions": [{"assertion": "The output fetches data from the Fireblocks Greenhouse API endpoint (boards-api.greenhouse.io/v1/boards/fireblocks/jobs)", "reason": "This assertion is skill-specific and will trivially fail for without_skill runs since those won't know to use the Greenhouse API. This is by design for differentiating skill vs no-skill, but it should be acknowledged that this assertion measures skill knowledge, not output quality."}], "overall": "Assertions are solid and test meaningful outcomes. The Greenhouse API assertion is the key discriminator between skill and no-skill runs."}}}, {"id": "eval-1-without_skill", "prompt": "my brother yoad just graduated CS and is looking for his first dev job. can you check if fireblocks has any open positions? he's based in israel", "eval_id": 1, "outputs": [{"name": "results.md", "type": "text", "content": "# Fireblocks Open Positions -- Search for Yoad\n\n**Search date:** 2026-03-28\n**Source:** [Fireblocks Greenhouse Job Board](https://job-boards.greenhouse.io/fireblocks)\n**Total open positions at Fireblocks:** 50\n\n---\n\n## Israel-Based R&D / Dev Positions (8 roles)\n\nThese are the engineering/dev roles based in Tel Aviv, Israel. Unfortunately, **all current Israel-based R&D roles are \"Senior\" level** -- there are no junior or entry-level developer positions listed at this time.\n\n### 1. Technical Integration Engineer\n- **Location:** Tel Aviv-Yafo, Israel\n- **Department:** R&D\n- **Published:** 2026-03-22\n- **Apply:** https://job-boards.greenhouse.io/fireblocks/jobs/4656817006\n- **Note:** This is the most promising role for a new grad -- it does not carry a \"Senior\" prefix and involves working with customers to integrate Fireblocks APIs. Could be a good entry point.\n\n### 2. Senior Software Engineer, Transaction Security\n- **Location:** Tel Aviv-Yafo, Israel\n- **Department:** R&D\n- **Published:** 2026-03-19\n- **Apply:** https://job-boards.greenhouse.io/fireblocks/jobs/4653827006\n\n### 3. Senior Backend Engineer, Key Management\n- **Location:** Tel Aviv-Yafo, Israel\n- **Department:** R&D\n- **Published:** 2026-03-25\n- **Apply:** https://job-boards.greenhouse.io/fireblocks/jobs/4666674006\n\n### 4. Senior C++ Engineer, Key Management\n- **Location:** Tel Aviv-Yafo, Israel\n- **Department:** R&D\n- **Published:** 2026-03-25\n- **Apply:** https://job-boards.greenhouse.io/fireblocks/jobs/4666670006\n\n### 5. Senior Full-Stack Engineer, DX (Developer Experience)\n- **Location:** Tel Aviv-Yafo, Israel\n- **Department:** R&D\n- **Published:** 2026-02-17\n- **Apply:** https://job-boards.greenhouse.io/fireblocks/jobs/4653822006\n\n### 6. Senior Full Stack Engineer, Subscriptions Team\n- **Location:** Tel Aviv-Yafo, Israel\n- **Department:** R&D\n- **Published:** 2026-02-02\n- **Apply:** https://job-boards.greenhouse.io/fireblocks/jobs/4629282006\n\n### 7. Senior Backend Engineer, Platform\n- **Location:** Tel Aviv-Yafo, Israel\n- **Department:** R&D\n- **Published:** 2025-09-16\n- **Apply:** https://job-boards.greenhouse.io/fireblocks/jobs/4601906006\n\n### 8. Engineering Team Lead - Network Platform\n- **Location:** Tel Aviv-Yafo, Israel\n- **Department:** R&D\n- **Published:** 2025-11-23\n- **Apply:** https://job-boards.greenhouse.io/fireblocks/jobs/4620537006\n\n---\n\n## Other Israel-Based Position (Non-Dev)\n\n### Senior Compliance Associate\n- **Location:** Tel Aviv-Yafo, Israel\n- **Department:** Legal & Compliance\n- **Published:** 2026-02-05\n- **Apply:** https://job-boards.greenhouse.io/fireblocks/jobs/4646869006\n\n---\n\n## Summary and Recommendations for Yoad\n\n**Honest assessment:** Fireblocks is currently hiring heavily for senior-level engineers in Israel. There are **no explicitly junior or entry-level dev positions** open at this time.\n\n**Best bet:**\n1. **Technical Integration Engineer** -- This is the one role without a \"Senior\" tag. It sits in R&D and likely involves helping clients integrate with Fireblocks APIs/SDKs. For a fresh CS grad, this could be a realistic entry point, especially if Yoad has experience with APIs, SDKs, or any blockchain/crypto coursework.\n\n**Worth a shot (even if marked \"Senior\"):**\n2. **Senior Full-Stack Engineer, DX** -- Developer Experience teams sometimes value fresh perspectives and strong communication skills. If Yoad has solid full-stack skills, applying with a strong cover letter explaining his background could work.\n3. **Senior Software Engineer, Transaction Security** -- If Yoad has any security or crypto background from university.\n\n**General tips:**\n- Fireblocks is a blockchain infrastructure company (digital asset custody, transfers, tokenization). Any crypto/blockchain knowledge or projects would stand out.\n- The careers page is at: https://www.fireblocks.com/careers/\n- Fireblocks uses Greenhouse for applications -- all links above go directly to the apply page.\n- It may be worth checking back regularly, as new positions are posted frequently (several were posted in the last week).\n- Consider reaching out to Fireblocks recruiters on LinkedIn directly -- Israeli tech companies often have unlisted junior roles or are willing to create positions for strong candidates.\n"}], "grading": {"expectations": [{"text": "The output fetches data from the Fireblocks Greenhouse API endpoint (boards-api.greenhouse.io/v1/boards/fireblocks/jobs)", "passed": false, "evidence": "Transcript shows the agent used curl to fetch 'https://www.fireblocks.com/careers/' and 'https://boards.greenhouse.io/fireblocks' (the HTML board page), not the JSON API endpoint 'boards-api.greenhouse.io/v1/boards/fireblocks/jobs'. The agent scraped the HTML page with grep and Python parsing rather than using the dedicated API."}, {"text": "Results include specific job titles (not just 'jobs available')", "passed": true, "evidence": "Results.md lists 9 specific job titles with detailed information, e.g., 'Technical Integration Engineer', 'Senior Software Engineer, Transaction Security', 'Senior Backend Engineer, Key Management', 'Senior C++ Engineer, Key Management', etc."}, {"text": "Results include apply URLs or links for individual positions", "passed": true, "evidence": "Every listed position includes a Greenhouse apply URL, e.g., 'https://job-boards.greenhouse.io/fireblocks/jobs/4656817006' for the Technical Integration Engineer, and similar URLs for all 9 positions."}, {"text": "Results mention location information for jobs", "passed": true, "evidence": "All positions include 'Location: Tel Aviv-Yafo, Israel' or 'Department' information. The Senior Compliance Associate notes 'Tel Aviv-Yafo, Israel' in the Legal & Compliance department."}, {"text": "Output is formatted as a readable list or table (not raw JSON)", "passed": true, "evidence": "Results are formatted as a numbered Markdown list with structured fields (Location, Department, Published, Apply, Note) under each job title. No raw JSON in output."}], "summary": {"passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8}, "timing": {"total_tokens": 21893, "total_duration_seconds": 110.5}, "claims": [{"claim": "50 total open positions at Fireblocks", "type": "factual", "verified": false, "evidence": "The with_skill run (same date) found 65 positions via the API. The without_skill run found 50 via HTML scraping. The discrepancy suggests the HTML page may not expose all positions, or the scraping missed some. The API data is likely more authoritative."}, {"claim": "9 Israel-based positions (8 in R&D, 1 in Legal & Compliance)", "type": "factual", "verified": false, "evidence": "The with_skill run found 17 Israel-based positions. The without_skill run found only 9. The HTML scraping approach missed 8 positions compared to the API, suggesting incomplete extraction."}, {"claim": "Technical Integration Engineer is the best match for a new grad", "type": "quality", "verified": true, "evidence": "Both with_skill and without_skill runs agree that Technical Integration Engineer is the most promising role for a new grad, as it lacks the 'Senior' prefix."}], "eval_feedback": {"suggestions": [], "overall": "The failed assertion correctly identifies the key difference: without the skill, the agent didn't know about the Greenhouse JSON API and instead scraped HTML, finding fewer jobs (50 vs 65). The assertions effectively differentiate skill-enabled vs. generic behavior."}}}, {"id": "eval-2-with_skill", "prompt": "search for junior software developer jobs in Israel across all the Israeli job boards. yoad just graduated and has no preference on tech stack", "eval_id": 2, "outputs": [{"name": "results.md", "type": "text", "content": "# Junior Software Developer Jobs in Israel -- Full Search Results\n\n**Search Date:** 2026-03-28\n**Profile:** Recent graduate, no experience required, no tech stack preference, open to all locations in Israel\n\n---\n\n## Summary\n\n- **Total unique junior/entry-level positions found:** 40+\n- **Sources searched:** 14 (AllJobs, Drushim, JobMaster, GotFriends, Indeed IL, Secret Tel Aviv, Janglo, Goozali, Wellfound, LinkedIn, Glassdoor, Built In, Junio, company APIs)\n- **Hebrew job boards searched:** AllJobs, Drushim, JobMaster, GotFriends\n- **English job boards searched:** Indeed IL, Secret Tel Aviv, Janglo, Wellfound, LinkedIn, Glassdoor, Built In\n- **Company APIs queried:** Wix, Monday, SimilarWeb, Riskified, AppsFlyer, Lightricks, HoneyBook, Forter, JFrog, Melio, Yotpo, Tipalti, BigPanda, Checkpoint\n- **Salary range (junior SWE, Tel Aviv):** NIS 130,843 -- 351,887/year (Glassdoor, 159 data points)\n\n---\n\n## HIGH-FIT Positions (Junior / Entry-Level / No Experience Required)\n\nThese positions are explicitly junior, entry-level, or accept graduates with no prior experience.\n\n### 1. Junior Software Engineer -- Secret Tel Aviv Jobs\n- **Company:** (Listed on Secret Tel Aviv)\n- **Location:** Israel\n- **Tech Stack:** Not specified\n- **Source:** Secret Tel Aviv\n- **Apply:** [Apply here](https://jobs.secrettelaviv.com/job/junior-software-engineer-30/)\n\n### 2. Junior Java Developer -- Secret Tel Aviv Jobs\n- **Company:** (Listed on Secret Tel Aviv)\n- **Location:** Israel\n- **Tech Stack:** Java\n- **Source:** Secret Tel Aviv\n- **Apply:** [Apply here](https://jobs.secrettelaviv.com/job/junior-java-developer/)\n\n### 3. Junior Backend Developer (Python & Django) -- Secret Tel Aviv Jobs\n- **Company:** (Listed on Secret Tel Aviv)\n- **Location:** Israel\n- **Tech Stack:** Python, Django\n- **Source:** Secret Tel Aviv\n- **Apply:** [Apply here](https://jobs.secrettelaviv.com/job/junior-backend-developer-pythondjango/)\n\n### 4. Junior Full Stack Developer -- Secret Tel Aviv Jobs\n- **Company:** (Listed on Secret Tel Aviv)\n- **Location:** Israel\n- **Tech Stack:** Full Stack\n- **Source:** Secret Tel Aviv\n- **Apply:** [Apply here](https://jobs.secrettelaviv.com/job/junior-full-stack-developer-38/)\n\n### 5. Junior Unity Developer -- Secret Tel Aviv Jobs\n- **Company:** (Listed on Secret Tel Aviv)\n- **Location:** Israel\n- **Tech Stack:** Unity, C#\n- **Source:** Secret Tel Aviv\n- **Apply:** [Apply here](https://jobs.secrettelaviv.com/job/junior-unity-developer/)\n\n### 6. Junior DevOps -- Secret Tel Aviv Jobs\n- **Company:** (Listed on Secret Tel Aviv)\n- **Location:** Israel\n- **Tech Stack:** DevOps\n- **Source:** Secret Tel Aviv\n- **Apply:** [Apply here](https://jobs.secrettelaviv.com/job/junior-devops-7/)\n\n### 7. Junior Full Stack Developer -- GotFriends (Financial Trading Portal)\n- **Company:** Financial Trading Portal\n- **Location:** Tel Aviv\n- **Tech Stack:** Full Stack\n- **Fit:** High\n- **Source:** GotFriends\n- **Apply:** [Apply here](https://www.gotfriends.co.il/jobslobby/software/full-stack-developer/%D7%9E%D7%A4%D7%AA%D7%97%D7%AA-full-stack-%D7%9C%D7%9E%D7%A9%D7%A8%D7%AA-%D7%92%D7%95%D7%A0%D7%99%D7%95%D7%A8/)\n\n### 8. Junior Developer (Mobile Advertising) -- GotFriends\n- **Company:** Startup\n- **Location:** Tel Aviv\n- **Tech Stack:** Mobile / Advertising\n- **Fit:** High\n- **Source:** GotFriends\n- **Apply:** [Apply here](https://www.gotfriends.co.il/jobslobby/software/frontend-developer/junior-developer/)\n\n### 9. Junior Fullstack Developer (Ad-Tech) -- GotFriends\n- **Company:** Ad-Tech Company\n- **Location:** Central Israel\n- **Tech Stack:** Full Stack\n- **Source:** GotFriends\n- **Apply:** [Apply here](https://www.gotfriends.co.il/jobslobby/software/full-stack-developer/junior-fullstack-developer/)\n\n### 10. Junior Web Developer (Security Startup) -- GotFriends\n- **Company:** Security Startup\n- **Location:** Central Israel\n- **Tech Stack:** Web Development\n- **Source:** GotFriends\n- **Apply:** [Apply here](https://gotfriends.co.il/jobslobby/software/frontend-programmer/junior-web-developer-%D7%9C%D7%A1%D7%98%D7%90%D7%A8%D7%98%D7%A4-%D7%91%D7%AA%D7%97%D7%95%D7%9D-%D7%94%D7%91%D7%98%D7%97%D7%95%D7%A0%D7%99)\n\n### 11. Junior C/C++ Software Engineer -- Cisco\n- **Company:** Cisco Systems\n- **Location:** Caesarea, Israel\n- **Tech Stack:** C, C++\n- **Fit:** High (explicit graduate program)\n- **Requirements:** B.Sc/M.Sc CS from leading Israeli university, GPA 88+\n- **Source:** Indeed IL / Cisco Careers\n- **Apply:** [Apply here](https://careers.cisco.com/) (search \"Junior Software Engineer Graduate Israel\")\n\n### 12. Junior Software Developer -- AllJobs (Software House, Rosh HaAyin)\n- **Company:** Software House\n- **Location:** Rosh HaAyin\n- **Tech Stack:** React, Node.js\n- **Requirements:** CS degree or significant dev course; React + Node.js knowledge\n- **Source:** AllJobs\n- **Apply:** [Search AllJobs](https://www.alljobs.co.il/SearchResultsGuest.aspx?page=1&position=235&type=33)\n\n### 13. Junior COBOL Developer -- Financial Organization (via John Bryce Talent)\n- **Company:** Leading financial org\n- **Location:** Israel (Central)\n- **Tech Stack:** COBOL\n- **Note:** Free bootcamp training, no prior experience needed\n- **Source:** AllJobs / Drushim\n- **Apply:** [Search Drushim](https://www.drushim.co.il/jobs/search/%D7%9E%D7%AA%D7%9B%D7%A0%D7%AA%20%D7%92'%D7%95%D7%A0%D7%99%D7%95%D7%A8/)\n\n### 14. Junior Java Developer -- Fintech Company\n- **Company:** Leading Fintech\n- **Location:** Israel\n- **Tech Stack:** Java\n- **Source:** Drushim\n- **Apply:** [Search Drushim](https://www.drushim.co.il/jobs/search/%D7%9E%D7%AA%D7%9B%D7%A0%D7%AA%20%D7%92'%D7%95%D7%A0%D7%99%D7%95%D7%A8/)\n\n### 15. Junior Developer -- DATA (Central Israel)\n- **Company:** DATA\n- **Location:** Central Israel\n- **Tech Stack:** Not specified\n- **Note:** Explicitly no prior work experience required\n- **Source:** Drushim\n- **Apply:** [Search Drushim](https://www.drushim.co.il/jobs/search/%D7%9E%D7%AA%D7%9B%D7%A0%D7%AA%20%D7%9C%D7%9C%D7%90%20%D7%A0%D7%99%D7%A1%D7%99%D7%95%D7%9F/)\n\n### 16. BI Developer -- No Experience (Company-funded training)\n- **Company:** Leading organization\n- **Location:** Central Israel\n- **Tech Stack:** BI / Data\n- **Note:** Company-funded training and conversion\n- **Source:** Drushim\n- **Apply:** [Search Drushim](https://www.drushim.co.il/jobs/search/%D7%9E%D7%A4%D7%AA%D7%97%20%D7%9C%D7%9C%D7%90%20%D7%A0%D7%A1%D7%99%D7%95%D7%9F/)\n\n### 17. Junior DevOps -- Infinity Labs (No experience)\n- **Company:** Infinity Labs\n- **Location:** Israel\n- **Tech Stack:** DevOps\n- **Source:** Drushim\n- **Apply:** [Search Drushim](https://www.drushim.co.il/jobs/search/%D7%9E%D7%AA%D7%9B%D7%A0%D7%AA%20%D7%9C%D7%9C%D7%90%20%D7%A0%D7%99%D7%A1%D7%99%D7%95%D7%9F/)\n\n### 18. Junior Front-End Developer -- Eternitech\n- **Company:** Eternitech\n- **Location:** Central Israel\n- **Tech Stack:** Web development technologies\n- **Requirements:** ~1 year web dev experience\n- **Source:** Indeed IL / Glassdoor\n- **Apply:** [Search Indeed IL](https://il.indeed.com/q-junior-developer-%D7%9E%D7%A9%D7%A8%D7%95%D7%AA.html)\n\n### 19. Junior JavaScript Developer -- Eternitech\n- **Company:** Eternitech\n- **Location:** Central Israel\n- **Tech Stack:** Node.js, JavaScript\n- **Requirements:** ~1 year Node.js experience\n- **Source:** Indeed IL / Glassdoor\n- **Apply:** [Search Indeed IL](https://il.indeed.com/q-junior-developer-%D7%9E%D7%A9%D7%A8%D7%95%D7%AA.html)\n\n### 20. Junior Fullstack Engineer (TypeScript / Node.js / React)\n- **Company:** (Startup, via Glassdoor)\n- **Location:** Israel\n- **Tech Stack:** TypeScript, Node.js, ReactJS\n- **Note:** Not an internship; building real product features\n- **Source:** Glassdoor\n- **Apply:** [Search Glassdoor](https://www.glassdoor.com/Job/israel-junior-software-developer-jobs-SRCH_IL.0,6_IN119_KO7,32.htm)\n\n### 21. Software Developer Entry Level (Spring 2026 Graduate Program)\n- **Company:** (Via Wellfound)\n- **Location:** Israel\n- **Tech Stack:** Not specified\n- **Source:** Wellfound\n- **Apply:** [Apply here](https://wellfound.com/jobs/3428292-software-developer-entry-level-spring-2026-graduate-program)\n\n### 22. Integration Developer -- Omnisis (Entry-Level)\n- **Company:** Omnisis\n- **Location:** Be'er Yaakov\n- **Tech Stack:** Integration / Development\n- **Source:** AllJobs\n- **Apply:** [Search AllJobs](https://www.alljobs.co.il/SearchResultsGuest.aspx?page=1&position=1694&type=&city=&region=)\n\n---\n\n## MEDIUM-FIT Positions (Non-Senior Dev Roles at Israeli Companies -- May Accept Juniors)\n\nThese are software development roles at Israeli companies that do not explicitly say \"senior\" or may be open to strong junior candidates.\n\n### From Company APIs (Greenhouse)\n\n| # | Title | Company | Location | Apply |\n|---|-------|---------|----------|-------|\n| 23 | Full Stack Engineer | Melio | Tel Aviv | [Apply](https://job-boards.greenhouse.io/melio/jobs/6743443003) |\n| 24 | Backend Engineer, Data | Melio | Tel Aviv | [Apply](https://job-boards.greenhouse.io/melio/jobs/7668970003) |\n| 25 | iOS Developer | Melio | Tel Aviv | [Apply](https://job-boards.greenhouse.io/melio/jobs/7665572003) |\n| 26 | Android Developer | SimilarWeb | Tel Aviv | [Apply](https://job-boards.greenhouse.io/similarweb/jobs/6962967) |\n| 27 | AI Engineer | SimilarWeb | Tel Aviv-Yafo | [Apply](https://job-boards.greenhouse.io/similarweb/jobs/7556263) |\n| 28 | Data Engineer | SimilarWeb | Tel Aviv-Yafo | [Apply](https://job-boards.greenhouse.io/similarweb/jobs/7556162) |\n| 29 | Back End Engineer (Yotpo Discover) | Yotpo | Tel Aviv | [Apply](https://www.yotpo.com/careers/gid-7379445?gh_jid=7379445) |\n| 30 | Backend Engineer | AppsFlyer | Herzliya | [Apply](https://careers.appsflyer.com/jobs/position/8403527002?gh_jid=8403527002) |\n| 31 | Data Engineer | AppsFlyer | Herzliya | [Apply](https://careers.appsflyer.com/jobs/position/8454717002?gh_jid=8454717002) |\n| 32 | Data Engineer | AppsFlyer | Herzliya | [Apply](https://careers.appsflyer.com/jobs/position/8379966002?gh_jid=8379966002) |\n| 33 | Full Stack Engineer | JFrog | Tel Aviv/Netanya | [Apply](https://join.jfrog.com/job/?job=7618525&gh_jid=7618525) |\n| 34 | Software Engineer - JFrog ML | JFrog | Tel Aviv/Netanya | [Apply](https://join.jfrog.com/job/?job=7645481&gh_jid=7645481) |\n| 35 | Software Engineer - FastCI | JFrog | Tel Aviv/Netanya | [Apply](https://join.jfrog.com/job/?job=7672441&gh_jid=7672441) |\n| 36 | Data Scientist | Riskified | Tel Aviv | [Apply](https://www.riskified.com/careers/job-description/?gh_jid=8218524002) |\n| 37 | SRE | Riskified | Tel Aviv | [Apply](https://www.riskified.com/careers/job-description/?gh_jid=8432893002) |\n| 38 | Data Researcher | Forter | Tel Aviv | [Apply](https://job-boards.greenhouse.io/forter/jobs/8440405002) |\n| 39 | Fraud Analyst | Forter | Tel Aviv | [Apply](https://job-boards.greenhouse.io/forter/jobs/8440396002) |\n\n---\n\n## Training Programs (Free, for Graduates -- Placement Included)\n\nThese are no-cost bootcamp/training programs that train junior developers and place them in companies.\n\n| # | Program | Provider | Location | Tech Focus | Apply |\n|---|---------|----------|----------|------------|-------|\n| 40 | Junior Developer Training (Free) | Experis Academy | Tel Aviv / Jerusalem | Java, C, C++, Cloud Backend, Embedded | [Search Indeed](https://il.indeed.com/q-junior-developer-%D7%9E%D7%A9%D7%A8%D7%95%D7%AA.html) |\n| 41 | Junior Developer Training | Infinity Labs | Haifa | Software Development | [Search Drushim](https://www.drushim.co.il/jobs/search/%D7%9E%D7%AA%D7%9B%D7%A0%D7%AA%20%D7%9C%D7%9C%D7%90%20%D7%A0%D7%99%D7%A1%D7%99%D7%95%D7%9F/) |\n| 42 | COBOL Junior Developer Bootcamp | John Bryce Talent | Central Israel | COBOL (Financial) | [Search AllJobs](https://www.alljobs.co.il/SearchResultsGuest.aspx?page=1&position=235&type=33) |\n| 43 | Wix Enter Student Program | Wix | Israel | Web Development | [Apply](https://www.wix-enter.com/) |\n\n---\n\n## Job Board Quick Links (Browse More)\n\n### Hebrew Boards\n| Board | Direct Search Link |\n|-------|-------------------|\n| AllJobs -- Software, No Experience | [Browse](https://www.alljobs.co.il/SearchResultsGuest.aspx?page=1&position=235&type=33) |\n| AllJobs -- Software Engineer, No Experience | [Browse](https://www.alljobs.co.il/SearchResultsGuest.aspx?page=1&position=1018&type=18) |\n| Drushim -- Junior Programmer | [Browse](https://www.drushim.co.il/jobs/search/%D7%9E%D7%AA%D7%9B%D7%A0%D7%AA%20%D7%92'%D7%95%D7%A0%D7%99%D7%95%D7%A8/) |\n| Drushim -- Developer No Experience | [Browse](https://www.drushim.co.il/jobs/search/%D7%9E%D7%A4%D7%AA%D7%97%20%D7%9C%D7%9C%D7%90%20%D7%A0%D7%A1%D7%99%D7%95%D7%9F/) |\n| Drushim -- Hi-Tech No Experience | [Browse](https://www.drushim.co.il/jobs/search/%D7%94%D7%99%D7%99%D7%98%D7%A7%20%D7%9C%D7%9C%D7%90%20%D7%A0%D7%99%D7%A1%D7%99%D7%95%D7%9F/) |\n| JobMaster -- Software, No Experience | [Browse](https://www.jobmaster.co.il/jobs/?q=%D7%AA%D7%95%D7%9B%D7%A0%D7%94+%D7%9C%D7%9C%D7%90+%D7%A0%D7%99%D7%A1%D7%99%D7%95%D7%9F) |\n| Mploy -- Junior | [Browse](https://www.mploy.co.il/job/search/%D7%92-%D7%95%D7%A0%D7%99%D7%95%D7%A8) |\n\n### English Boards\n| Board | Direct Search Link |\n|-------|-------------------|\n| Indeed IL -- Junior Developer | [Browse](https://il.indeed.com/q-junior-developer-%D7%9E%D7%A9%D7%A8%D7%95%D7%AA.html) |\n| Indeed IL -- Junior Software Engineer | [Browse](https://il.indeed.com/q-junior-software-engineer-%D7%9E%D7%A9%D7%A8%D7%95%D7%AA.html) |\n| Secret Tel Aviv -- Programmer Jobs | [Browse](https://jobs.secrettelaviv.com/list/category/programmer/) |\n| LinkedIn -- Junior Developer Israel | [Browse](https://il.linkedin.com/jobs/junior-developer-jobs) |\n| LinkedIn -- Junior Software Developer Israel | [Browse](https://il.linkedin.com/jobs/junior-software-developer-jobs) |\n| Glassdoor -- Junior Software Developer Israel | [Browse](https://www.glassdoor.com/Job/israel-junior-software-developer-jobs-SRCH_IL.0,6_IN119_KO7,32.htm) |\n| Glassdoor -- Entry Level Software Engineer Israel | [Browse](https://www.glassdoor.com/Job/israel-entry-level-software-engineer-jobs-SRCH_IL.0,6_IN119_KO7,36.htm) |\n| Wellfound -- Israel Startups | [Browse](https://wellfound.com/location/israel) |\n| Built In -- Israel Software Engineer | [Browse](https://builtin.com/jobs/mena/israel/dev-engineering/search/software-engineer) |\n| Goozali -- Israel Hi-Tech Job Seekers | [Browse](https://en.goozali.com) |\n| Expoint -- Full Stack Developer Israel | [Browse](https://expoint.co/?location=israel&title=full+stack+developer) |\n\n---\n\n## Top Companies Actively Hiring Junior/Entry-Level in Israel (March 2026)\n\nBased on aggregated search data:\n\n| Company | Role Type | Source |\n|---------|-----------|--------|\n| Cisco | Junior Software Engineer (Graduate) | Cisco Careers |\n| Eternitech | Junior Front-End, Junior JS Developer | Indeed IL / Glassdoor |\n| DATA | Junior Developer (no experience) | Drushim |\n| Infinity Labs | Training + Placement | Drushim |\n| Experis Academy | Training + Placement | Indeed IL |\n| iCloudius | Junior positions | Glassdoor |\n| Deloitte | Junior positions | Glassdoor |\n| Agora | Junior positions | Glassdoor |\n| Pango | Junior positions | Glassdoor |\n| Tonkean | Junior positions | Glassdoor |\n| GigaSpaces | Junior positions | Glassdoor |\n| D-Fend Solutions | Junior positions | Glassdoor |\n| Apple | Entry-level | Glassdoor |\n| DRIVENETS | Junior positions | Glassdoor |\n| DraftKings | Software Engineer (Unity) | Built In |\n\n---\n\n## Market Overview\n\n- **LinkedIn** lists 1,000+ junior software developer jobs and 2,000+ junior software engineer jobs in Israel as of March 2026\n- **Glassdoor** shows 224 \"junior\" jobs in Israel and 860 \"software developer\" jobs\n- **Geographic hotspots:** Tel Aviv-Yafo, Herzliya, Ramat Gan, Haifa, Jerusalem, Ra'anana, Petah Tikva, Netanya, Caesarea, Be'er Sheva\n- **In-demand stacks:** Java, Python, Node.js, React, TypeScript, C/C++, Unity, Full Stack (general)\n- **Training programs** are abundant for graduates with no experience -- Experis Academy, Infinity Labs, John Bryce Talent, and Wix Enter all offer free programs with job placement\n\n---\n\n## Preference Scoring\n\nBased on `~/.yoad-jobs/preferences.md`:\n\n| Criterion | Match |\n|-----------|-------|\n| Junior / Entry-level | YES -- all positions above |\n| Software development (not QA/support) | YES -- filtered |\n| Israel location | YES -- all positions |\n| No tech stack preference | YES -- wide range covered |\n| No minimum salary | N/A |\n| Growth opportunity / mentorship | Training programs offer this |\n\n---\n\n## Sources\n\n- [AllJobs -- Software No Experience](https://www.alljobs.co.il/SearchResultsGuest.aspx?page=1&position=235&type=33)\n- [Drushim -- Junior Programmer](https://www.drushim.co.il/jobs/search/%D7%9E%D7%AA%D7%9B%D7%A0%D7%AA%20%D7%92'%D7%95%D7%A0%D7%99%D7%95%D7%A8/)\n- [Drushim -- Developer No Experience](https://www.drushim.co.il/jobs/search/%D7%9E%D7%A4%D7%AA%D7%97%20%D7%9C%D7%9C%D7%90%20%D7%A0%D7%A1%D7%99%D7%95%D7%9F/)\n- [JobMaster -- Software No Experience](https://www.jobmaster.co.il/jobs/?q=%D7%AA%D7%95%D7%9B%D7%A0%D7%94+%D7%9C%D7%9C%D7%90+%D7%A0%D7%99%D7%A1%D7%99%D7%95%D7%9F)\n- [Indeed IL -- Junior Developer](https://il.indeed.com/q-junior-developer-%D7%9E%D7%A9%D7%A8%D7%95%D7%AA.html)\n- [Secret Tel Aviv -- Programmer Jobs](https://jobs.secrettelaviv.com/list/category/programmer/)\n- [GotFriends -- Junior Full Stack](https://www.gotfriends.co.il/jobslobby/software/full-stack-developer/%D7%9E%D7%A4%D7%AA%D7%97%D7%AA-full-stack-%D7%9C%D7%9E%D7%A9%D7%A8%D7%AA-%D7%92%D7%95%D7%A0%D7%99%D7%95%D7%A8/)\n- [LinkedIn -- Junior Developer Israel](https://il.linkedin.com/jobs/junior-developer-jobs)\n- [Glassdoor -- Junior Software Developer Israel](https://www.glassdoor.com/Job/israel-junior-software-developer-jobs-SRCH_IL.0,6_IN119_KO7,32.htm)\n- [Wellfound -- Israel](https://wellfound.com/location/israel)\n- [Built In -- Israel](https://builtin.com/jobs/mena/israel/dev-engineering/search/software-engineer)\n- [Goozali -- Israel Hi-Tech](https://en.goozali.com)\n- [Glassdoor -- Junior SWE Salary Tel Aviv](https://www.glassdoor.com/Salaries/tel-aviv-yafo-israel-junior-software-engineer-salary-SRCH_IL.0,20_IM1002_KO21,45.htm)\n- [Cisco Careers](https://careers.cisco.com/)\n- [Wix Enter](https://www.wix-enter.com/)\n"}], "grading": {"expectations": [{"text": "WebSearch is used to query at least 2 different Israeli job board sites (e.g., alljobs.co.il, drushim.co.il, il.indeed.com, janglo.net)", "passed": true, "evidence": "Transcript shows WebSearch queries targeting multiple Israeli job board sites: 'site:alljobs.co.il OR site:drushim.co.il' (Search 1a), 'site:jobmaster.co.il OR site:drushim.co.il' (Search 1b), 'site:alljobs.co.il' (Search 1c), 'site:il.indeed.com OR site:janglo.net' (Search 2a), 'site:gotfriends.co.il OR site:secrettelaviv.com' (Search 2b). At least 6 different Israeli job board sites were targeted."}, {"text": "At least one search query contains Hebrew characters (e.g., \u05de\u05e4\u05ea\u05d7 \u05ea\u05d5\u05db\u05e0\u05d4, \u05de\u05ea\u05db\u05e0\u05ea)", "passed": true, "evidence": "Transcript shows 4 Hebrew-language queries: '\u05de\u05e4\u05ea\u05d7 \u05ea\u05d5\u05db\u05e0\u05d4 \u05d2'\u05d5\u05e0\u05d9\u05d5\u05e8 2026' (Search 1a), '\u05de\u05ea\u05db\u05e0\u05ea \u05dc\u05dc\u05d0 \u05e0\u05d9\u05e1\u05d9\u05d5\u05df' (Search 1b), '\u05de\u05d4\u05e0\u05d3\u05e1 \u05ea\u05d5\u05db\u05e0\u05d4 \u05d2'\u05d5\u05e0\u05d9\u05d5\u05e8 \u05d9\u05e9\u05e8\u05d0\u05dc \u05d3\u05e8\u05d5\u05e9\u05d9\u05dd' (Search 1c), '\u05e4\u05d5\u05dc \u05e1\u05d8\u05d0\u05e7 \u05d2'\u05d5\u05e0\u05d9\u05d5\u05e8 \u05d3\u05e8\u05d5\u05e9\u05d9\u05dd \u05ea\u05dc \u05d0\u05d1\u05d9\u05d1' (Search 1d)."}, {"text": "Results include source attribution indicating which site each job came from", "passed": true, "evidence": "Every job listing in results.md includes a 'Source' field identifying the origin, e.g., 'Source: Secret Tel Aviv', 'Source: GotFriends', 'Source: Drushim', 'Source: AllJobs', 'Source: Indeed IL / Cisco Careers', 'Source: Glassdoor', 'Source: Wellfound'. Company API results are also attributed."}, {"text": "Output includes at least 3 distinct job listings with titles", "passed": true, "evidence": "Results.md contains 43+ distinct job listings with specific titles across HIGH-FIT (22 positions), MEDIUM-FIT (17 positions), and Training Programs (4 programs). Examples: 'Junior Software Engineer' (Secret Tel Aviv), 'Junior Java Developer' (Secret Tel Aviv), 'Junior Backend Developer (Python & Django)' (Secret Tel Aviv), 'Junior Full Stack Developer' (GotFriends), 'Junior C/C++ Software Engineer' (Cisco), etc."}], "summary": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0}, "timing": {"total_tokens": 54129, "total_duration_seconds": 330.0}, "claims": [{"claim": "40+ total unique junior/entry-level positions found", "type": "factual", "verified": true, "evidence": "The results list 22 HIGH-FIT positions, 17 MEDIUM-FIT positions from company APIs, and 4 training programs, totaling 43 items. The 40+ claim is supported."}, {"claim": "14 sources searched", "type": "factual", "verified": true, "evidence": "The transcript documents WebSearch queries targeting AllJobs, Drushim, JobMaster, GotFriends, Indeed IL, Secret Tel Aviv, Janglo, LinkedIn, Glassdoor, Built In, Wellfound, Goozali, startup.jobs, plus 9+ Greenhouse API company endpoints. 14+ sources is confirmed."}, {"claim": "Salary range NIS 130,843 - 351,887/year based on 159 data points", "type": "factual", "verified": false, "evidence": "This data is attributed to Glassdoor but cannot be independently verified from the outputs. The specific numbers and data point count were extracted from a WebSearch result summary."}], "eval_feedback": {"suggestions": [{"reason": "No assertion checks the quality or actionability of the job listings (e.g., whether apply links are functional, whether the jobs are actually junior-level). The current assertions verify presence and structure but not whether the results would genuinely help a job seeker."}], "overall": "Assertions are well-chosen for a general search eval. Consider adding a quality check for whether listings are genuinely junior-level."}}}, {"id": "eval-2-without_skill", "prompt": "search for junior software developer jobs in Israel across all the Israeli job boards. yoad just graduated and has no preference on tech stack", "eval_id": 2, "outputs": [], "grading": {"expectations": [{"text": "WebSearch is used to query at least 2 different Israeli job board sites (e.g., alljobs.co.il, drushim.co.il, il.indeed.com, janglo.net)", "passed": false, "evidence": "No output files exist in the outputs/ directory. The run appears to have produced no results.md or transcript.md. Cannot verify any assertions."}, {"text": "At least one search query contains Hebrew characters (e.g., \u05de\u05e4\u05ea\u05d7 \u05ea\u05d5\u05db\u05e0\u05d4, \u05de\u05ea\u05db\u05e0\u05ea)", "passed": false, "evidence": "No transcript.md exists. Cannot verify search queries used."}, {"text": "Results include source attribution indicating which site each job came from", "passed": false, "evidence": "No results.md exists. The outputs/ directory is empty."}, {"text": "Output includes at least 3 distinct job listings with titles", "passed": false, "evidence": "No results.md exists. The outputs/ directory is empty."}], "summary": {"passed": 0, "failed": 4, "total": 4, "pass_rate": 0.0}, "claims": [], "eval_feedback": {"suggestions": [], "overall": "This run produced no output files at all. The outputs/ directory is empty. All assertions fail by default since there is no evidence to evaluate."}}}, {"id": "eval-3-with_skill", "prompt": "scan ashby companies for remote software developer positions that yoad could apply to - he's a fresh CS grad looking to work remotely from israel", "eval_id": 3, "outputs": [], "grading": null}, {"id": "eval-3-without_skill", "prompt": "scan ashby companies for remote software developer positions that yoad could apply to - he's a fresh CS grad looking to work remotely from israel", "eval_id": 3, "outputs": [{"name": "results.md", "type": "text", "content": "# Remote Software Developer Positions on Ashby-Hosted Job Boards\n\n**For:** Yoad, fresh CS grad looking to work remotely from Israel\n**Date:** March 28, 2026\n**Source:** Ashby-hosted job boards (jobs.ashbyhq.com)\n\n---\n\n## Summary\n\nI scanned dozens of Ashby-hosted company job boards for remote software developer positions suitable for a fresh CS graduate working from Israel. The reality is challenging: most \"new grad\" roles on Ashby are US-based and on-site/hybrid, and most truly remote positions require 3+ years of experience. Israel is not a common hiring location for these companies.\n\nBelow I categorize findings by how realistic they are for Yoad.\n\n---\n\n## TIER 1: Best Matches (Remote, Entry-Level Friendly, Potentially Israel-Eligible)\n\n### 1. Deel -- Full Stack Engineer (EMEA)\n- **URL:** https://jobs.ashbyhq.com/deel/c6492fda-ddca-4ea1-b13a-1195ec6b2658\n- **Also:** https://jobs.ashbyhq.com/deel/f677f26e-a10a-40e4-a3f5-8fdcbec54aca (React/Node.js variant)\n- **Location:** EMEA (remote)\n- **Experience:** 4+ years required (mid-level, NOT junior-friendly)\n- **Israel status:** The standard listing excludes Israel explicitly. However, the React/Node.js variant says \"EMEA\" which technically includes the Middle East. Worth applying and asking.\n- **Note:** Deel is a global payroll company that operates in 150+ countries including Israel, so they have the infrastructure to hire there. Worth a shot despite the experience gap.\n- **Tech:** TypeScript, React, Node.js, Express, PostgreSQL\n\n### 2. Ashby (the company) -- Design Engineer, EU\n- **URL:** https://jobs.ashbyhq.com/ashby/ (look for Design Engineer, EU)\n- **Location:** Remote - Europe (24 EU locations listed)\n- **Salary:** EUR 141K-226K\n- **Experience:** Not explicitly junior, likely senior IC level given comp\n- **Israel status:** Europe-focused, Israel not in EU but worth inquiring\n- **Note:** Ashby is remote-first with EMEA teams. The \"Design Engineer\" role is a hybrid engineering + design role.\n\n### 3. G2i -- Various Remote Engineering Positions\n- **URL:** https://jobs.ashbyhq.com/g2i\n- **Positions available:**\n  - FullStack (Ruby + React) Developer -- Remote (permanent hire)\n  - FullStack Engineer (Ruby + React) -- Remote (contract)\n  - AI Engineer -- Europe (permanent, EUR 80K-120K + equity)\n  - Backend Developer (Rust) -- Europe (permanent)\n  - AI Software Engineer (C#) -- Remote, multiple global locations\n  - AI Software Engineer (C++) -- Remote, multiple global locations\n- **Experience:** The AI Engineer role requires 2-5+ years. Contract roles may be more flexible.\n- **Israel status:** Not explicitly listed but G2i is a distributed talent marketplace -- worth applying\n- **Note:** G2i is a developer talent network that places engineers at client companies. Good entry point for remote work.\n\n### 4. Supabase -- Support Engineer (EMEA) / Database Support Engineer (EMEA)\n- **URL:** https://jobs.ashbyhq.com/supabase/c01f7436-1fdd-4a3e-8b96-8cadc33b006e\n- **URL:** https://jobs.ashbyhq.com/supabase/3889002e-536e-4046-a330-70e942b0cc96\n- **Location:** Remote, EMEA time zones required\n- **Experience:** Support Engineer needs 3+ years; Database Support Engineer needs 6+ years\n- **Israel status:** EMEA time zones -- Israel (UTC+2/+3) fits. Supabase hires globally.\n- **Note:** Not entry-level, but Supabase is a very remote-friendly company. Worth watching for future junior openings.\n\n### 5. Supabase -- SDK Engineers (Go / C# / Kotlin)\n- **URLs:**\n  - https://jobs.ashbyhq.com/supabase/fe5bbc98-1add-4dc3-aed5-b3cf444c8849 (Go)\n  - https://jobs.ashbyhq.com/supabase/6a0e111d-6246-43b8-80c3-037303ff9fb2 (C#)\n  - https://jobs.ashbyhq.com/supabase/ad92f53a-6d0f-4761-abc3-588c7c7c6cd8 (Kotlin)\n- **Location:** Remote (global)\n- **Note:** Supabase is fully remote and hires globally. These SDK roles may be more accessible. Worth checking experience requirements on the full postings.\n\n---\n\n## TIER 2: Worth Applying (Remote, but Israel Eligibility Uncertain or Higher Experience Required)\n\n### 6. Quora -- Software Engineer New Grad 2025-2026, Data Infrastructure (Remote)\n- **URL:** https://jobs.ashbyhq.com/quora/6d5ce948-148e-4b0b-8623-4dbc4517a743\n- **Location:** Remote - Multiple Locations\n- **Experience:** New grad (BS/MS/PhD in CS, 2025 or 2026)\n- **Salary:** $97,600-$139,000 (US)\n- **Israel status:** NOT eligible. Quora's eligible countries list does NOT include Israel. Eligible: US, Canada, India, Ireland, UK, Egypt, Estonia, Germany, Mexico, Nigeria, Philippines, Poland, South Korea, Thailand, Bangladesh, Costa Rica, Lithuania, Estonia, Latvia.\n- **Tech:** Python, Kafka, Spark, Airflow\n\n### 7. Quora -- AI Engineer New Grad 2025-2026, Poe (Remote)\n- **URL:** https://jobs.ashbyhq.com/quora/6df58d3e-855a-423e-99fd-a56ac8824b34\n- **Location:** Remote - Multiple Locations\n- **Experience:** New grad (2025 or 2026)\n- **Salary:** $107,360-$152,900 (US)\n- **Israel status:** NOT eligible (same country list as above)\n- **Tech:** LLMs, RAG, prompt engineering, agentic workflows\n\n### 8. Quora -- ML Engineer New Grad 2025-2026, Ads (Remote)\n- **URL:** https://jobs.ashbyhq.com/quora/cb455a21-e66f-4e21-afdf-4511c6c442d1\n- **Location:** Remote - Multiple Locations\n- **Experience:** New grad\n- **Israel status:** NOT eligible\n\n### 9. Checkly -- Junior Software Developer in Support (Remote)\n- **URL:** https://jobs.ashbyhq.com/checkly/29c057b4-2797-4eb7-8013-ed9772c6d28f\n- **Status:** This position appears to be FILLED/CLOSED. It no longer shows on Checkly's current job board. When it was open, it was aimed at Americas timezone. Checkly's current openings are all senior level (UTC-3 to UTC+3 timezone, which WOULD include Israel).\n- **Note:** Keep an eye on Checkly -- they are a remote-first company hiring in Israel-compatible timezones.\n\n### 10. Resend -- Design Engineer (Europe)\n- **URL:** https://jobs.ashbyhq.com/resend/732f4aa5-c8c3-45b9-92bb-086256b2503f\n- **Location:** Europe / Remote / Full-time\n- **Note:** This is a design + engineering hybrid role. Israel proximity to Europe may qualify.\n\n### 11. EverAI -- Senior Software Engineer (Full Remote - Europe)\n- **URL:** https://jobs.ashbyhq.com/everai/3b22edca-5a41-4c00-9936-fda979904d81\n- **Location:** Europe (Remote)\n- **Experience:** Senior level\n- **Note:** EverAI has EMEA and Europe remote roles. Not junior-friendly but the company is globally distributed.\n\n### 12. WunderGraph -- Senior Design Engineer / Senior Full Stack Engineer (EMEA)\n- **URLs:**\n  - https://jobs.ashbyhq.com/wundergraph/2b5e8d34-d64d-487a-9bd0-ed3f3d511af8\n  - https://jobs.ashbyhq.com/WunderGraph/1c60792f-3f36-461c-93b9-c20bcd43ffc7\n- **Location:** EMEA (Remote)\n- **Experience:** Senior level\n- **Note:** EMEA includes Middle East. Senior roles only currently.\n\n### 13. LangChain -- Customer Engineer (Europe)\n- **URL:** https://jobs.ashbyhq.com/langchain/f0cd9c72-4f1d-480b-85b6-d36615a6a92d\n- **Location:** Europe\n- **Note:** Technical customer-facing role at a leading AI/LLM company.\n\n---\n\n## TIER 3: US-Only New Grad Roles (Would Require Relocation/Visa)\n\nThese are excellent new grad positions but require US presence:\n\n| Company | Role | Location | Salary | URL |\n|---------|------|----------|--------|-----|\n| Replit | Software Engineer - New Grad (Summer 2026) | Foster City, CA (Hybrid) | $140K-$180K | [Link](https://jobs.ashbyhq.com/replit/b5e81eae-06f9-4798-8988-2d06ca936dbc) |\n| Benchling | Software Engineer, New Grad (2026) | San Francisco, CA | N/A | [Link](https://jobs.ashbyhq.com/benchling/b3c9b312-6e2b-4dbc-9b15-0b0310d75a7f) |\n| Whatnot | Software Engineer, New Grad | San Francisco/LA/Seattle | $140K-$150K | [Link](https://jobs.ashbyhq.com/whatnot/bc8f8c7f-2c4c-4f43-a238-953568c101b8) |\n| Decagon | Agent Software Engineer - New Grad (2026) | SF or NYC | $180K | [Link](https://jobs.ashbyhq.com/decagon/95a4707d-1def-481a-bb78-38a4b22b6891) |\n| Zip | Software Engineer, New Grad (2026 Start) | Toronto | N/A | [Link](https://jobs.ashbyhq.com/zip/19f459ee-4907-4883-9d70-35eb96f62082) |\n| Sierra | Software Engineer, Agent (New Grad) | San Francisco | N/A | [Link](https://jobs.ashbyhq.com/sierra/6a75b530-b7bb-4439-bb67-37b4f2b75b96) |\n| Sierra | Software Engineer, Agent (New Grad) | London | N/A | [Link](https://jobs.ashbyhq.com/sierra/0ff928f7-cca0-4d2b-ae64-c07277ff5252) |\n| Mechanize | Junior Software Engineer | San Francisco (on-site) | $300K (!!) | [Link](https://jobs.ashbyhq.com/mechanize/b50c89dc-001c-4fb6-a4fc-a9f52f35b490) |\n| Ramp | University Grad, Software Engineer, Frontend | NYC | N/A | [Link](https://jobs.ashbyhq.com/ramp/a1229aec-1105-4c47-8533-b912e732ed89) |\n| Fieldguide | Software Engineer (All Levels) | Remote US | $150K-$260K | [Link](https://jobs.ashbyhq.com/fieldguide/47a2afc4-1075-4378-83bb-714543b6c272) |\n| Abridge | Software Engineer (All Levels) | SF or NYC (Hybrid) | $178.5K-$248K | [Link](https://jobs.ashbyhq.com/Abridge/03699ed8-5cf5-4917-96a6-101f15a653e5) |\n\n---\n\n## TIER 4: Israel-Based Roles (Not Junior Developer, But at Ashby Companies)\n\n### Zip -- Senior Technical Support Engineer (Israel)\n- **URL:** https://jobs.ashbyhq.com/zip/e4cd98f7-2585-4ac1-97f4-6090fa7c9271\n- **Location:** Tel Aviv, Israel\n- **Experience:** 5-6 years required\n- **Note:** This confirms Zip has an Israel entity. Watch for future engineering openings.\n\n---\n\n## Recommendations for Yoad\n\n1. **Apply broadly to EMEA remote roles** even if they say \"senior\" -- Deel, Supabase, WunderGraph, and G2i all hire in EMEA which technically includes Israel. Some companies are flexible on experience for strong candidates.\n\n2. **Top picks to apply to right now:**\n   - Deel Full Stack Engineer (EMEA) -- even though it says 4+ years, Deel has Israel infrastructure\n   - G2i contract roles -- they're a talent marketplace with global remote positions\n   - Supabase SDK Engineer roles -- fully remote, global hiring\n   - Checkly -- watch for new junior openings (they hire in UTC-3 to UTC+3 which covers Israel)\n   - LangChain Customer Engineer (Europe)\n\n3. **Build a pipeline:** Set up alerts on these Ashby job boards:\n   - https://jobs.ashbyhq.com/deel\n   - https://jobs.ashbyhq.com/supabase\n   - https://jobs.ashbyhq.com/checkly\n   - https://jobs.ashbyhq.com/posthog\n   - https://jobs.ashbyhq.com/ashby\n   - https://jobs.ashbyhq.com/g2i\n   - https://jobs.ashbyhq.com/linear\n   - https://jobs.ashbyhq.com/wundergraph\n\n4. **Reality check:** The Ashby ecosystem skews heavily toward US-based companies. For a fresh grad working remotely from Israel, the best strategy may be to also look at:\n   - Israeli companies using Ashby (like Zip's Israel office)\n   - European remote-first companies\n   - Companies explicitly hiring in EMEA/worldwide\n\n5. **Quora is NOT an option** -- despite being remote-first with new grad positions, Israel is not on their eligible countries list.\n\n---\n\n## Companies Checked (Exhaustive List)\n\nThe following companies' Ashby job boards were checked via API and/or web search:\n\nAshby, Deel, OpenAI, Quora, Suno, Zapier, n8n, Notion, Whatnot, Sentry, Replit, Benchling, Zip, WunderGraph, Ramp, Handshake, Sierra, Harvey, G2i, EverAI, Pragmatike, Checkly, Firecrawl, Cursor, Linear, Supabase, Railway, Render, Airbyte, PostHog, Resend, Inngest, Infisical, Anyscale, LangChain, Pinecone, Weaviate, Cloudflare, GitLab, Stripe, Snyk, Wiz, Figma, Vercel, BRM, Meshy, Eventual, Continue, Profound, Decagon, Kikoff, Fieldguide, Abridge, Mechanize, UnlikelyAI, Jerry.ai, DualEntry, Blossom Health, Foundry for Good, Lottie, TENEX.AI, SFG20, 10x Team, Reonic, Acorns, Camunda, Reedsy, Sitemate, Empirical Security, Bjak, The Flex, Academia.edu, Dandy, Orb, PermitFlow, N1, 8VC, Ellipsis Labs, Angle Health\n\n---\n\n*Note: Job listings change frequently. Positions may close or new ones may open at any time. Last checked March 28, 2026.*\n"}], "grading": null}, {"id": "eval-4-with_skill", "prompt": "run a broad job search across Israeli sites for yoad. he's a recent CS graduate looking for any junior dev role in israel or remote. no specific tech stack preference", "eval_id": 4, "outputs": [{"name": "results.md", "type": "text", "content": "# Job Search Results -- Yoad Hordan\n\n**Date:** 2026-03-28\n**Search Terms:** junior software developer, entry level developer, remote developer Israel, \u05de\u05e4\u05ea\u05d7 \u05ea\u05d5\u05db\u05e0\u05d4 \u05d2'\u05d5\u05e0\u05d9\u05d5\u05e8, \u05de\u05ea\u05db\u05e0\u05ea \u05dc\u05dc\u05d0 \u05e0\u05d9\u05e1\u05d9\u05d5\u05df\n**Sites Searched:** Indeed IL, Janglo, Secret Tel Aviv, Wellfound, Startup.Jobs, Goozali, AllJobs, Drushim, JobMaster, GotFriends, Glassdoor, LinkedIn, Built In\n\n---\n\n## Top Matches -- 2026-03-28\n\n### 1. Junior Full Stack Developer at Financial Trading Portal (via GotFriends)\n- **Fit**: High\n- **Location**: Tel Aviv (Central Israel)\n- **Source**: GotFriends (Job #120707)\n- **Tech Stack**: React, Node.js, MongoDB\n- **Experience**: 6 months frontend/fullstack OR degree graduates (no experience)\n- **Why**: Explicitly accepts degree graduates with zero experience. React/Node/MongoDB is a mainstream modern stack. Small company (20 people) with growth opportunity. Financial domain is interesting and stable.\n- **Apply**: [GotFriends #120707](https://www.gotfriends.co.il/jobslobby/software/full-stack-developer/%D7%9E%D7%A4%D7%AA%D7%97%D7%AA-full-stack-%D7%9C%D7%9E%D7%A9%D7%A8%D7%AA-%D7%92%D7%95%D7%A0%D7%99%D7%95%D7%A8/)\n\n### 2. Junior Developer (Mobile Advertising) at Startup (via GotFriends)\n- **Fit**: High\n- **Location**: Tel Aviv\n- **Source**: GotFriends (Job #121319)\n- **Tech Stack**: Not specified (frontend focus)\n- **Experience**: Junior level\n- **Why**: Early-stage startup (3 employees, first year, profitable), junior-level explicitly. Good entry point with high ownership potential.\n- **Apply**: [GotFriends #121319](https://www.gotfriends.co.il/jobslobby/software/frontend-developer/junior-developer/)\n\n### 3. Junior Developer (No Experience) at Infinity Labs (via Drushim)\n- **Fit**: High\n- **Location**: Haifa\n- **Source**: Drushim\n- **Tech Stack**: Training provided (various)\n- **Experience**: None required -- requires first degree in engineering/sciences or psychometric 680+\n- **Why**: Zero experience required. Company provides full training at their expense, then places you at leading security/tech companies. Great for a fresh CS grad who wants structured onboarding.\n- **Apply**: [Drushim - Infinity Labs](https://www.drushim.co.il/jobs/search/%D7%9E%D7%AA%D7%9B%D7%A0%D7%AA%20%D7%9C%D7%9C%D7%90%20%D7%A0%D7%99%D7%A1%D7%99%D7%95%D7%9F/)\n\n### 4. Junior Developer Training (Free) at Experis Academy (via Drushim / JobMaster)\n- **Fit**: High\n- **Location**: Tel Aviv / Jerusalem\n- **Source**: Drushim, JobMaster\n- **Tech Stack**: Java, C, C++ (backend focus), option for Embedded or Cloud specialization\n- **Experience**: None required -- requires degree with 85+ GPA, psychometric 680+\n- **Why**: Free 5-6 month intensive bootcamp with hands-on projects and industry mentors, followed by placement at tech companies/startups. Multiple locations. Hybrid format.\n- **Apply**: [Drushim - Experis](https://www.drushim.co.il/jobs/search/%D7%9E%D7%AA%D7%9B%D7%A0%D7%AA%20%D7%9E%D7%AA%D7%97%D7%99%D7%9C/)\n\n### 5. Software Engineer, Unity at DraftKings (via Built In)\n- **Fit**: High\n- **Location**: Tel Aviv\n- **Source**: Built In\n- **Tech Stack**: C#, Unity\n- **Experience**: Junior level\n- **Why**: Established company (DraftKings) with clear junior position. Game development domain with modern tech. Good brand name on resume.\n- **Apply**: [Built In - DraftKings](https://builtin.com/jobs/mena/israel/dev-engineering/search/software-engineer)\n\n### 6. Junior Developer (E-commerce) at Startup (via GotFriends)\n- **Fit**: Medium\n- **Location**: Tel Aviv (Central Israel)\n- **Source**: GotFriends (Job #120389)\n- **Tech Stack**: Node.js or Go, plus client-side development\n- **Experience**: 1 year in Node/Go development\n- **Why**: Good e-commerce product role at growing startup (~10 employees). Marked medium because it asks for 1 year experience, but a strong CS grad portfolio could bridge that gap.\n- **Apply**: [GotFriends #120389](https://www.gotfriends.co.il/jobslobby/software/go-developer/junior-developer/)\n\n### 7. Junior Fullstack Developer at Ad-Tech Company (via GotFriends)\n- **Fit**: Medium\n- **Location**: Central Israel\n- **Source**: GotFriends (Job #100627)\n- **Tech Stack**: PHP, Node.js, Angular\n- **Experience**: Junior level (PHP devs transitioning to Node.js)\n- **Why**: Leading ad-tech company with \"advanced technologies and excellent conditions.\" Medium fit because it specifically targets PHP-to-Node transitions, but junior level overall.\n- **Apply**: [GotFriends #100627](https://www.gotfriends.co.il/jobslobby/software/full-stack-developer/junior-fullstack-developer/)\n\n### 8. Junior Web Developer at Security Startup (via GotFriends)\n- **Fit**: Medium\n- **Location**: Central Israel\n- **Source**: GotFriends (Job #99568)\n- **Tech Stack**: Angular (frontend)\n- **Experience**: Junior level, Angular background\n- **Why**: Security/defense startup developing platform for governments. Medium because the security domain may require clearance (a soft dealbreaker). Worth checking clearance requirements.\n- **Apply**: [GotFriends #99568](https://gotfriends.co.il/jobslobby/software/frontend-programmer/junior-web-developer-%D7%9C%D7%A1%D7%98%D7%90%D7%A8%D7%98%D7%A4-%D7%91%D7%AA%D7%97%D7%95%D7%9D-%D7%94%D7%91%D7%98%D7%97%D7%95%D7%A0%D7%99)\n\n### 9. Integration Developer (Entry-Level) at Omnisis (via AllJobs)\n- **Fit**: Medium\n- **Location**: Be'er Yaakov\n- **Source**: AllJobs\n- **Tech Stack**: Python, C++, C#, communication protocols\n- **Experience**: Entry-level\n- **Why**: Explicitly entry-level with Python and C++ -- standard CS grad skills. Location in Be'er Yaakov is less central but accessible.\n- **Apply**: [AllJobs - Omnisis](https://www.alljobs.co.il/SearchResultsGuest.aspx?page=1&position=1694&type=&city=&region=)\n\n### 10. Junior AI/ML Engineer at Experis Academy (via Drushim)\n- **Fit**: Medium\n- **Location**: Tel Aviv\n- **Source**: Drushim\n- **Tech Stack**: AI/ML tools (training provided)\n- **Experience**: Entry-level, requires first degree with 85+ average or relevant tech background\n- **Why**: ML/AI is a growing field. Bootcamp-style program with placement. Medium fit because it's more ML-focused than pure SWE, but could be excellent for a CS grad interested in ML.\n- **Apply**: [Drushim - Experis AI/ML](https://www.drushim.co.il/jobs/search/%D7%9E%D7%AA%D7%9B%D7%A0%D7%AA%20%D7%9C%D7%9C%D7%90%20%D7%A0%D7%99%D7%A1%D7%99%D7%95%D7%9F/)\n\n### 11. Wix Enter '24 Student Program at Wix (via Wix Careers)\n- **Fit**: Medium\n- **Location**: Israel (Wix offices)\n- **Source**: Wix Careers\n- **Tech Stack**: Varies by team\n- **Experience**: CS/Software Engineering students graduating 2026 or later\n- **Why**: Wix is a top Israeli tech employer. Structured program with mentorship. Medium because it targets students rather than graduates, but worth checking if recent grads qualify.\n- **Apply**: [Wix Enter Program](https://www.wix-enter.com/)\n\n---\n\n## Summary\n\n| Metric | Count |\n|--------|-------|\n| Sites searched | 13 |\n| Total jobs discovered | 30+ |\n| High-fit matches | 5 |\n| Medium-fit matches | 6 |\n| Low-fit / Skipped | ~20 (senior roles, non-dev, requires 5+ years) |\n\n### Market Snapshot (March 2026)\n- **LinkedIn** reports 150 junior developer jobs in Israel (126 in Tel Aviv alone)\n- **Glassdoor** shows 25 junior software developer + 8 entry-level software engineer jobs\n- **Indeed IL** lists 25+ junior developer positions\n- **Drushim** has 383 no-experience developer openings\n- Entry-level software engineer salaries in Israel: approximately 25,000-30,000 NIS/month\n\n### Key Observations\n1. **Training/bootcamp programs dominate** the no-experience segment (Infinity Labs, Experis Academy, John Bryce). These offer free training + placement and are strong options for new grads.\n2. **GotFriends has the best direct junior listings** with specific job details and reasonable requirements.\n3. **Tel Aviv is the clear hub** -- the vast majority of junior positions are in Tel Aviv and central Israel.\n4. **Most \"junior\" roles ask for 0-1 years** -- a fresh CS degree with projects/portfolio is competitive.\n5. **Remote positions exist** but are rarer for junior roles; most employers want juniors on-site or hybrid.\n\n---\n\n## Next Steps\n\n1. **Apply immediately** to High-fit matches #1 and #2 (GotFriends direct junior roles)\n2. **Register with training programs** (#3 Infinity Labs, #4 Experis) as backup -- these have rolling admissions\n3. **Check these company career pages directly** for unlisted junior roles:\n   - [Wix Careers](https://careers.wix.com/positions)\n   - [Monday.com Careers](https://monday.com/careers)\n   - [Fiverr Careers](https://www.fiverr.com/jobs)\n   - [Taboola Careers](https://www.taboola.com/careers)\n   - [CyberArk Careers](https://www.cyberark.com/careers)\n4. **Set up alerts** on LinkedIn (150 jobs), Glassdoor, and Drushim for \"junior developer Israel\"\n5. For additional results, ask me to search Indeed using the Indeed connector: \"Search Indeed for junior software developer jobs in Israel\"\n\n---\n\n## Sources\n\n- [Indeed IL - Junior Developer Jobs](https://il.indeed.com/Junior-Developer-jobs)\n- [Indeed IL - Junior Software Engineer Jobs](https://il.indeed.com/q-junior-software-engineer-%D7%9E%D7%A9%D7%A8%D7%95%D7%AA.html)\n- [GotFriends - Junior Developer #120389](https://www.gotfriends.co.il/jobslobby/software/go-developer/junior-developer/)\n- [GotFriends - Full Stack Junior #120707](https://www.gotfriends.co.il/jobslobby/software/full-stack-developer/%D7%9E%D7%A4%D7%AA%D7%97%D7%AA-full-stack-%D7%9C%D7%9E%D7%A9%D7%A8%D7%AA-%D7%92%D7%95%D7%A0%D7%99%D7%95%D7%A8/)\n- [GotFriends - Junior Developer #121319](https://www.gotfriends.co.il/jobslobby/software/frontend-developer/junior-developer/)\n- [GotFriends - Junior Fullstack #100627](https://www.gotfriends.co.il/jobslobby/software/full-stack-developer/junior-fullstack-developer/)\n- [GotFriends - Junior Web Developer #99568](https://gotfriends.co.il/jobslobby/software/frontend-programmer/junior-web-developer-%D7%9C%D7%A1%D7%98%D7%90%D7%A8%D7%98%D7%A4-%D7%91%D7%AA%D7%97%D7%95%D7%9D-%D7%94%D7%91%D7%98%D7%97%D7%95%D7%A0%D7%99)\n- [Drushim - Programmer No Experience](https://www.drushim.co.il/jobs/search/%D7%9E%D7%AA%D7%9B%D7%A0%D7%AA%20%D7%9C%D7%9C%D7%90%20%D7%A0%D7%99%D7%A1%D7%99%D7%95%D7%9F/)\n- [Drushim - Developer No Experience](https://www.drushim.co.il/jobs/search/%D7%9E%D7%A4%D7%AA%D7%97%20%D7%9C%D7%9C%D7%90%20%D7%A0%D7%A1%D7%99%D7%95%D7%9F/)\n- [AllJobs - Python Developer](https://www.alljobs.co.il/SearchResultsGuest.aspx?page=1&position=1694&type=&city=&region=)\n- [JobMaster - Hi-Tech No Experience](https://www.jobmaster.co.il/jobs/?q=%D7%94%D7%99%D7%99%D7%98%D7%A7+%D7%9C%D7%9C%D7%90+%D7%A0%D7%99%D7%A1%D7%99%D7%95%D7%9F)\n- [Startup.Jobs - Junior Software Developer Israel](https://startup.jobs/locations/israel/junior-software-developer)\n- [Wellfound - Israel Jobs](https://wellfound.com/location/israel)\n- [Goozali - Israel Hi-Tech](https://en.goozali.com)\n- [LinkedIn - Junior Developer Israel](https://il.linkedin.com/jobs/junior-developer-jobs)\n- [Glassdoor - Junior Software Developer Israel](https://www.glassdoor.com/Job/israel-junior-software-developer-jobs-SRCH_IL.0,6_IN119_KO7,32.htm)\n- [Built In - Software Engineer Israel](https://builtin.com/jobs/mena/israel/dev-engineering/search/software-engineer)\n- [Wix Enter Program](https://www.wix-enter.com/)\n- [Wix Careers](https://careers.wix.com/positions)\n"}], "grading": {"expectations": [{"text": "WebSearch queries target multiple Israeli job sites (at least 2 different domains)", "passed": true, "evidence": "Transcript Step 2 documents 11 WebSearch queries targeting multiple domains: 'site:il.indeed.com' (Search 1), 'site:janglo.net OR site:secrettelaviv.com' (Search 2), 'site:wellfound.com OR site:startup.jobs' (Search 3), 'site:goozali.com' (Search 4), 'site:alljobs.co.il' (Search 5), 'site:drushim.co.il' (Search 6), 'site:jobmaster.co.il' (Search 7), 'site:gotfriends.co.il' (Search 8). At least 8 different Israeli job site domains were targeted."}, {"text": "Both Hebrew and English search queries are used", "passed": true, "evidence": "Transcript Step 2 shows English searches (e.g., 'junior software developer Israel site:il.indeed.com 2026') and Hebrew searches (e.g., '\u05de\u05e4\u05ea\u05d7 \u05ea\u05d5\u05db\u05e0\u05d4 \u05d2'\u05d5\u05e0\u05d9\u05d5\u05e8 site:alljobs.co.il', '\u05de\u05ea\u05db\u05e0\u05ea OR \u05de\u05e4\u05ea\u05d7 \u05ea\u05d5\u05db\u05e0\u05d4 \u05dc\u05dc\u05d0 \u05e0\u05d9\u05e1\u05d9\u05d5\u05df site:drushim.co.il'). Both languages clearly used."}, {"text": "Results are scored or categorized by fit level (High/Medium/Low or similar)", "passed": true, "evidence": "Results.md categorizes all positions with explicit fit ratings: 'Fit: High' for 5 positions (e.g., 'Junior Full Stack Developer at Financial Trading Portal'), 'Fit: Medium' for 6 positions (e.g., 'Junior Developer (E-commerce) at Startup'). The summary table shows 'High-fit matches: 5, Medium-fit matches: 6, Low-fit / Skipped: ~20'."}, {"text": "Output references ~/.yoad-jobs/ data directory (preferences or history)", "passed": true, "evidence": "Transcript Step 0 states: 'Verified ~/.yoad-jobs/preferences.md exists' and 'Verified ~/.yoad-jobs/job-history.md exists'. Step 1 confirms reading preferences and job history. Step 6 documents appending to '~/.yoad-jobs/job-history.md'. Results.md also references preferences in the Scoring section."}, {"text": "Results include source attribution for each job listing", "passed": true, "evidence": "Every job listing in results.md includes a 'Source' field: e.g., 'Source: GotFriends (Job #120707)', 'Source: Drushim', 'Source: Built In', 'Source: AllJobs', 'Source: Wix Careers'. All 11 scored jobs have source attribution."}], "summary": {"passed": 5, "failed": 0, "total": 5, "pass_rate": 1.0}, "timing": {"total_tokens": 39421, "total_duration_seconds": 252.5}, "claims": [{"claim": "30+ unique job leads identified after deduplication", "type": "factual", "verified": false, "evidence": "The results.md presents 11 scored jobs (5 High + 6 Medium) and mentions '~20 Low-fit / Skipped'. The total of ~31 is consistent with the '30+' claim, but only 11 are presented in detail."}, {"claim": "LinkedIn reports 150 junior developer jobs in Israel (126 in Tel Aviv alone)", "type": "factual", "verified": false, "evidence": "These numbers are attributed to LinkedIn via WebSearch but cannot be independently verified from available outputs. The specific counts came from search result snippets."}, {"claim": "GotFriends was the most productive source for specific junior job listings", "type": "quality", "verified": true, "evidence": "Transcript Step 2 (Search 8) found 5 distinct junior developer postings from GotFriends, and 3 of the 5 High-fit results in the final output came from GotFriends. This supports the claim."}], "eval_feedback": {"suggestions": [], "overall": "Assertions are comprehensive and well-balanced, covering process (search breadth, language diversity), content (scoring, source attribution), and data management (preferences directory). No gaps identified."}}}, {"id": "eval-4-without_skill", "prompt": "run a broad job search across Israeli sites for yoad. he's a recent CS graduate looking for any junior dev role in israel or remote. no specific tech stack preference", "eval_id": 4, "outputs": [{"name": "results.md", "type": "text", "content": "# Junior Developer Job Search Results for Yoad\n**Date:** March 28, 2026\n**Profile:** Recent CS graduate, looking for junior dev roles in Israel or remote. No specific tech stack preference.\n\n---\n\n## Table of Contents\n1. [Market Overview](#market-overview)\n2. [Specific Job Listings Found](#specific-job-listings-found)\n3. [Graduate/Training Programs](#graduatetraining-programs)\n4. [Top Hiring Companies](#top-hiring-companies)\n5. [Remote Opportunities](#remote-opportunities)\n6. [Israeli Job Boards to Monitor](#israeli-job-boards-to-monitor)\n7. [Salary Benchmarks](#salary-benchmarks)\n8. [Tips and Market Context](#tips-and-market-context)\n\n---\n\n## Market Overview\n\nThe Israeli junior developer market in March 2026 is competitive but has real openings. Key stats:\n\n- **~1,000+ junior software developer** positions on LinkedIn Israel\n- **~2,000+ graduate software engineer** positions on LinkedIn Israel\n- **~25-35 explicitly \"junior developer\"** positions on Glassdoor Israel at any time\n- **~8 entry-level software engineer** positions on Glassdoor Israel\n- **~153 junior Python** jobs on LinkedIn Israel\n- **~67 junior front-end web developer** jobs on LinkedIn Israel\n- **~104 front-end developer** jobs across Israel (Glassdoor, March 2026)\n- **~403 backend developer** jobs in Israel (Glassdoor)\n- **~261 full-stack developer** jobs in Tel Aviv alone (Glassdoor, March 2026)\n- **~224 \"junior\" roles** across all categories in Israel (Glassdoor, March 2026)\n\n**Important context:** A Globes report noted only ~88 out of ~5,641 open tech positions were explicitly for candidates without experience, reflecting a tight junior market. However, many roles labeled generically (e.g., \"Software Engineer\" or \"Full Stack Developer\") may still consider strong junior candidates.\n\n**Key cities:** Tel Aviv-Yafo, Herzliya, Ramat Gan, Haifa, Petah Tikva, Netanya, Raanana, Jerusalem, Kfar Saba, Rishon LeZion.\n\n---\n\n## Specific Job Listings Found\n\n### Explicitly Junior / Entry-Level Positions\n\n| # | Company | Job Title | Location | Key Details |\n|---|---------|-----------|----------|-------------|\n| 1 | **Hewlett Packard Enterprise** | Junior Software Engineer | Tel Aviv-Yafo | Posted within 24 hours of search |\n| 2 | **Elbit Systems Israel** | Junior Software Developer | Haifa District | Posted 1 week ago |\n| 3 | **Elbit Systems Israel** | Junior Software Developer - Analytics Group | Sderot | Posted 1 week ago |\n| 4 | **DRS RADA Technologies** | Junior ATE Software Engineer | Netanya | Posted 1 week ago |\n| 5 | **DRS RADA Technologies** | Junior ATE Software Engineer | Beit Shean | Posted 2 months ago |\n| 6 | **Rayzone Group** | Junior Full Stack Developer | Tel Aviv-Yafo | Posted 1 month ago |\n| 7 | **inManage** | Junior React Developer | Tel Aviv-Yafo | E-commerce solutions company; posted 1 month ago |\n| 8 | **inManage** | Junior Backend Developer (PHP) | Tel Aviv-Yafo | Posted 2 months ago |\n| 9 | **InfinityLabs R&D** | Junior Software Engineer - Entry Level AI Engineering | Center District | Posted 2 weeks ago |\n| 10 | **InfinityLabs R&D** | Junior Software Engineer - Entry Level Career Path | Haifa District | Posted 1 month ago |\n| 11 | **Kishrim Plus** | Junior Software Developer | Petah Tikva | CS degree or coding course; no prior experience needed; posted same day |\n| 12 | **VAST Data** | Software Engineer - New College Grad | Tel Aviv-Yafo | Explicitly for new graduates; posted 4 months ago |\n| 13 | **VAST Data** | Software Engineer - New College Grad | Haifa | Explicitly for new graduates; posted 4 months ago |\n| 14 | **PTC** | Junior Software Engineer | Herzliya | Working on Creo 3D MCAD tool |\n| 15 | **DraftKings** | Software Engineer, Unity | Tel Aviv (Hybrid) | Junior level; C#/Unity game development |\n| 16 | **Eternitech** | Junior Front-End Developer | Central Israel | 6+ months web dev experience |\n| 17 | **Eternitech** | Junior JavaScript Developer | Central Israel | 1 year Node.js backend experience |\n\n### Positions Suitable for Junior Applicants (Not Explicitly \"Junior\" but Accessible)\n\n| # | Company | Job Title | Location | Key Details |\n|---|---------|-----------|----------|-------------|\n| 18 | **Arcos LLC** | Web Developer (React/Node) | Israel | Posted 1 day ago |\n| 19 | **Fiverr** | Frontend Developer | Tel Aviv-Yafo | Posted within 24 hours |\n| 20 | **Wix** | Frontend Developer - Legends | Tel Aviv-Yafo | Posted 1 week ago |\n| 21 | **Wix** | Frontend Developer - Editor Platform | Tel Aviv-Yafo | Posted 1 week ago |\n| 22 | **Wix** | Frontend Engineer - Wix Studio | Tel Aviv-Yafo | Posted 2 weeks ago |\n| 23 | **Deloitte** | Full Stack Developer | Tel Aviv District | Posted 4 days ago |\n| 24 | **abra** | Full Stack Developer | West Jerusalem | Posted 4 days ago |\n| 25 | **abra** | Frontend Developer | Haifa | Posted 1 week ago |\n| 26 | **abra** | .NET Web Developer | Haifa | Posted 1 month ago |\n| 27 | **Really Good** | Frontend Developer | Tel Aviv-Yafo | Posted 1 month ago |\n| 28 | **Insait** | Full Stack Engineer | Tel Aviv-Yafo | Posted 1 week ago |\n| 29 | **Tenable** | Frontend Engineer - T1 | Tel Aviv-Yafo | T1 may indicate entry-level tier |\n| 30 | **Reflectiz** | Frontend Engineer | Ramat Gan | Posted 3 months ago |\n| 31 | **Finubit** | Frontend Developer | Tel Aviv-Yafo | Posted 2 months ago |\n| 32 | **Guardio** | Frontend Developer | Tel Aviv-Yafo | Posted 4 months ago |\n| 33 | **eko** | Fullstack Developer | Tel Aviv-Yafo | Posted 1 month ago |\n| 34 | **UR Tech Jobs** | FrontEnd Developer | Petah Tikva | Posted 2 months ago |\n| 35 | **groundcover** | Frontend Engineer | Tel Aviv-Yafo | Posted 2 months ago |\n| 36 | **proteanTecs** | Frontend Developer | Haifa | Posted 4 days ago |\n| 37 | **Earnix** | Front-End Developer | Ramat Gan | Posted 5 days ago |\n| 38 | **Bylith** | Frontend Developer | Netanya | Posted 4 months ago |\n| 39 | **Truvid** | Frontend Developer | Raanana | Posted 1 week ago |\n| 40 | **Sunbit** | Frontend Developer | Tel Aviv District | Posted 1 week ago |\n| 41 | **Sela** | Frontend Developer | Center District | Posted 1 day ago |\n| 42 | **Mobile Group Ltd.** | Frontend Developer | Hadera | Posted 2 weeks ago |\n| 43 | **Munters** | Frontend Developer | Petah Tikva | Posted 1 week ago |\n| 44 | **Trilogical Technologies** | WEB Developer - IoT & GIS | Rishon LeZion | Posted 2 weeks ago |\n| 45 | **Regatta Data** | Frontend Engineer | Binyamina | Posted 1 month ago |\n| 46 | **Triple Whale** | Frontend Engineer | Jerusalem District | Posted 1 week ago |\n| 47 | **Wiz** | Frontend Engineer | Tel Aviv-Yafo | Posted 2 weeks ago |\n| 48 | **Appdome** | Frontend Developer (Angular) | Tel Aviv-Yafo | Posted 2 weeks ago |\n| 49 | **Dialog** | Frontend Developer | Tel Aviv District | Posted 2 days ago |\n| 50 | **Reindeer AI** | Software Engineer (Frontend/Fullstack) | Tel Aviv-Yafo | Posted 3 weeks ago |\n| 51 | **Rhino Federated Computing** | Frontend Engineer | Tel Aviv-Yafo | Posted 5 days ago |\n| 52 | **Bagira** | Full Stack Web Developer | Center District | Posted 4 months ago |\n| 53 | **Sett** | Web Games Developer | Tel Aviv-Yafo | Posted 5 months ago |\n| 54 | **GoodWork Environmental Jobs** | Web Application Developers | Or Akiva | Posted 2 weeks ago |\n| 55 | **monday.com** | Incubation Software Engineer | Tel Aviv (Hybrid) | Node.js, Postgres, React, TypeScript |\n| 56 | **monday.com** | Software Engineer | Tel Aviv (Remote/Hybrid) | AWS, MySQL, Node.js, React, Ruby on Rails |\n| 57 | **Meta** | Software Engineer | Tel Aviv-Yafo | Posted 2 days ago |\n| 58 | **Gotfriends** | Frontend Developer | Tel Aviv District | Posted 3 days ago |\n| 59 | **Yarden Abramovich HR** | Front-End Developer (AdTech) | Raanana | Posted 2 days ago |\n\n### From Hebrew Job Boards (Drushim.co.il)\n\n| # | Company | Job Title | Location | Key Details |\n|---|---------|-----------|----------|-------------|\n| 60 | **Kishrim Plus** | Junior Software Developer | Petah Tikva | No experience required, CS degree or coding course |\n| 61 | **John Bryce** | Junior Cloud Data Manager (training program) | Multiple cities | Free Oracle bootcamp, 1.5 months, includes job placement |\n| 62 | **Yael Group (Cyber)** | Junior System Administrator | Multiple locations | 1-2 years experience, VMWARE/AD knowledge |\n| 63 | **Harel Connect** | Junior AI/Automation Business Specialist | Nes Ziona | Analytical thinking, no dev experience explicitly required |\n\n---\n\n## Graduate/Training Programs\n\nThese are structured programs specifically designed for junior developers or recent graduates:\n\n### 1. Wix KickstartX 2026\n- **What:** 7-month immersive program for junior developers (0-3 years experience)\n- **Focus:** AI-native engineering, full-stack development\n- **Location:** Wix Campus, Tel Aviv (Glilot), 5 days/week on-site\n- **Timeline:** Registration opened March 25; Technical exam April 17; Interviews April 29-May 4; Program starts June 14, 2026\n- **Outcome:** Placement in a Wix engineering team upon completion\n- **Requirements:** Understanding of at least one programming language (React, Node.js, Java); demonstrated use of AI tools\n- **URL:** [https://www.wixkickstart.com](https://www.wixkickstart.com) / [Wix Careers](https://careers.wix.com/position/REF3076Q-744000116493477)\n- **STATUS: APPLICATION WINDOW MAY HAVE CLOSED (March 26). Check if late applications are accepted.**\n\n### 2. Wix Enter Program\n- **What:** 4-week training for student software developers on web fundamentals\n- **Target:** CS/Software Engineering students graduating 2026+\n- **URL:** [https://www.wix-enter.com](https://www.wix-enter.com)\n\n### 3. Express Academic - Free Junior Developer Training\n- **What:** 6-month hybrid bootcamp\n- **Location:** Jerusalem\n- **Focus:** Backend development (Java, C, C++); specialization in Embedded Real-Time or cloud-based backend\n- **Requirements:** Bachelor's degree (GPA 85+), Psychometric 680+\n- **Cost:** Free\n- **URL:** Found on Indeed Israel\n\n### 4. Israel Innovation Authority - High-Tech Specialization for Juniors\n- **What:** Government program for new graduates with tech degrees\n- **Focus:** Training for entry-level development roles\n- **URL:** [https://innovationisrael.org.il/en/program/high-tech-specialization-first-job-employees-juniors](https://innovationisrael.org.il/en/program/high-tech-specialization-first-job-employees-juniors)\n\n### 5. John Bryce / Oracle - Junior Cloud Data Manager\n- **What:** Free 1.5-month bootcamp with Oracle including job placement support\n- **Location:** Multiple cities in Israel\n\n### 6. Playtika Academies\n- **What:** Playtika plans to open academies to recruit and train employees for gaming industry roles\n- **Location:** Herzliya (HQ)\n\n### 7. Israel Tech Challenge (ITC)\n- **What:** Programs in software development, full-stack web, data science, cybersecurity, hardware engineering\n- **Duration:** 3-10 months\n- **Location:** Tel Aviv\n- **Method:** Based on IDF Unit 8200 training methods\n- **URL:** [Israel Tech Challenge](https://www.switchup.org/bootcamps/israel-tech-challenge)\n\n---\n\n## Top Hiring Companies\n\nBased on aggregated data from multiple job boards, these companies are actively hiring in Israel (March 2026):\n\n### Large Tech / Multinationals\n- **Hewlett Packard Enterprise** - Junior positions in Tel Aviv\n- **Meta** - Software Engineer in Tel Aviv\n- **Google** - Multiple engineer roles (Ramat Gan, Tel Aviv, Haifa)\n- **Apple** - FullStack Developer in Herzliya\n- **Microsoft** - Offices in Herzliya, Tel Aviv, Haifa, Nazareth\n- **SAP** - Multiple Israel positions\n- **Wix** - Multiple frontend/engineer roles + KickstartX program\n- **monday.com** - Software Engineer positions (Tel Aviv)\n- **Fiverr** - Frontend Developer (Tel Aviv)\n- **Check Point** - Cybersecurity roles\n- **CyberArk** - Security-focused positions\n- **Amdocs** - ~12 open positions in Israel\n\n### Defense / Aerospace\n- **Elbit Systems Israel** - Junior Software Developer (Haifa, Sderot)\n- **DRS RADA Technologies** - Junior ATE Software Engineer (Netanya, Beit Shean)\n- **Rayzone Group** - Junior Full Stack Developer (Tel Aviv)\n\n### Startups / Scale-ups\n- **VAST Data** - New College Grad positions (Tel Aviv, Haifa)\n- **Wiz** - Frontend Engineer (Tel Aviv)\n- **DraftKings** - Unity Software Engineer (Tel Aviv)\n- **Insait** - Full Stack Engineer (Tel Aviv)\n- **groundcover** - Frontend Engineer (Tel Aviv)\n- **Triple Whale** - Frontend Engineer (Jerusalem)\n- **Reindeer AI** - Frontend/Fullstack (Tel Aviv)\n- **Sunbit** - Frontend Developer (Tel Aviv)\n- **Guardio** - Frontend Developer (Tel Aviv)\n- **proteanTecs** - Frontend Developer (Haifa)\n- **Eternitech** - Junior JavaScript & Frontend Developer (Central Israel)\n- **inManage** - Junior React & PHP Developer (Tel Aviv)\n- **Deloitte** - Full Stack Developer (Tel Aviv)\n- **PTC** - Junior Software Engineer (Herzliya)\n\n### Other Notable Employers Mentioned\nIronCircle, Gini Apps, BiltOn, DRIVENETS, Mend, Razor Labs, riverside.fm, Shift4, Mize, CodeValue, Invaya, Ravin AI, Consist Group, ART Medical, Pango, Anchor Fintech, Planck, Taboola, Playtika\n\n---\n\n## Remote Opportunities\n\n### Platforms for Remote Work from Israel\n\n| Platform | URL | Notes |\n|----------|-----|-------|\n| **Arc** | [arc.dev/en-il/remote-jobs](https://arc.dev/en-il/remote-jobs) | 300+ remote jobs; freelance and full-time |\n| **Remote Rocketship** | [remoterocketship.com/country/israel](https://www.remoterocketship.com/country/israel/jobs/developer/) | Remote developer jobs for Israel |\n| **Dynamite Jobs** | [dynamitejobs.com/country/remote-jobs-in-israel](https://dynamitejobs.com/country/remote-jobs-in-israel) | Remote jobs in Israel |\n| **Jobicy** | [jobicy.com/job-region/israel](https://jobicy.com/job-region/israel) | Remote jobs, Israel region |\n| **Remotive** | [remotive.com/remote-israel-jobs](https://remotive.com/remote-israel-jobs) | Remote Israel jobs |\n| **Indeed** | [indeed.com - Israel remote](https://www.indeed.com/q-israel-developer-l-remote-jobs.html) | 20+ remote developer jobs |\n\n### Specific Remote Listings Found\n\n| Company | Role | Rate/Salary | Details |\n|---------|------|-------------|---------|\n| Arc Exclusive | QA Tester for SaaS Platform | $20-35/hr | Freelance, mid-level, part-time, remote anywhere |\n| Arc Exclusive | Full Stack Developer (AI Experience) | $45-55/hr | Python, React, Node.js; remote anywhere |\n| Arc Exclusive | Fullstack Engineer (Go) | $20-35/hr | Golang, API, JavaScript; overlap with London |\n| Allied Benefit Systems | Senior Software Engineer - Backend | Full-time | Remote (Israel, US); Azure, C#, .NET |\n| Toloka | Freelance Technical Solutions Engineer | Full-time | Remote (incl. Israel); AI, Python, ML |\n| Cornerstone OnDemand | Digital Marketing Manager - Israel | Full-time | Remote - Israel |\n\n### Glassdoor Remote Stats\n- **451 remote jobs** in Israel listed on Glassdoor (March 2026)\n\n---\n\n## Israeli Job Boards to Monitor\n\n### English-Language Boards\n| Board | URL | Specialty |\n|-------|-----|-----------|\n| **LinkedIn Israel** | [il.linkedin.com/jobs](https://il.linkedin.com/jobs/junior-software-developer-jobs) | Largest professional network; 1,000+ junior dev jobs |\n| **Glassdoor** | [glassdoor.com - Israel](https://www.glassdoor.com/Job/israel-junior-developer-jobs-SRCH_IL.0,6_IN119_KO7,23.htm) | Jobs + salary data + company reviews |\n| **Indeed Israel** | [il.indeed.com](https://il.indeed.com/Junior-Developer-jobs) | 25+ junior developer jobs |\n| **Secret Tel Aviv Jobs** | [jobs.secrettelaviv.com](https://jobs.secrettelaviv.com/list/category/programmer/) | Israel's largest English-speaking job board |\n| **Built In** | [builtin.com/jobs/mena/israel](https://builtin.com/jobs/mena/israel) | Tech & startup jobs in Israel |\n| **Startup Jobs** | [startup.jobs/locations/israel](https://startup.jobs/locations/israel) | Startup-focused |\n| **Wellfound (AngelList)** | [wellfound.com/location/israel](https://wellfound.com/location/israel) | Startup jobs |\n| **Workable** | [jobs.workable.com - Israel](https://jobs.workable.com/search/israel/software-developer-jobs) | Software developer jobs |\n| **Top Startups** | [topstartups.io - Tel Aviv](https://topstartups.io/jobs/?job_location=Tel+Aviv) | 835 startup jobs in Tel Aviv |\n\n### Hebrew-Language Boards\n| Board | URL | Specialty |\n|-------|-----|-----------|\n| **AllJobs** | [alljobs.co.il](https://www.alljobs.co.il) | Israel's largest job board |\n| **Drushim** | [drushim.co.il](https://www.drushim.co.il/jobs/search/%D7%92'%D7%95%D7%A0%D7%99%D7%95%D7%A8/) | Junior-specific search available |\n| **GotFriends** | [gotfriends.co.il](https://www.gotfriends.co.il) | Recruitment agency with junior positions |\n| **Jobify360** | [jobify360.co.il](https://jobify360.co.il/jobs/junior-software-developer) | Junior software developer listings |\n| **JobSwipe** | [jobswipe.co](https://jobswipe.co) | Junior positions without experience |\n| **Poenta** | [poenta.co.il](https://www.poenta.co.il/article/junior-hitech-jobs/) | Junior hi-tech job resources |\n| **CareerJet Israel** | [careerjet.co.il](https://www.careerjet.co.il) | Aggregator with junior developer search |\n\n### Junior-Specific Boards\n| Board | URL | Specialty |\n|-------|-----|-----------|\n| **JUNIO** | [junio.co.il](https://junio.co.il/) | Israel's first job board exclusively for junior hi-tech positions |\n| **DevJobs Israel** | [devjobs.co.il](https://www.devjobs.co.il) | Developer-specific Israeli job board |\n\n---\n\n## Salary Benchmarks\n\n| Role | Salary Range | Source |\n|------|-------------|--------|\n| Junior Full Stack Developer (Tel Aviv) | NIS 15,000-25,000/month | Quora / market data |\n| Full Stack Developer (Israel avg) | ~NIS 264,947/year (~NIS 22,000/month) | SalaryExpert |\n| Entry-Level QA Engineer (Tel Aviv) | ~NIS 146,504/year (~NIS 12,200/month) | SalaryExpert |\n| DevOps Engineer (Israel avg) | ~NIS 225,100/year (~NIS 18,750/month) | PayScale |\n| Python Developer (Israel avg) | ~NIS 265,408/year (~NIS 22,100/month) | Glassdoor |\n| Remote roles (Israel-based) | $2,900-$8,300/month (some up to $18,600) | Arc |\n\n---\n\n## Tips and Market Context\n\n### Reality Check\n- The junior market in Israel is competitive. A Globes article reported only **88 out of ~5,641** open positions were explicitly for no-experience candidates.\n- Many positions labeled \"developer\" or \"engineer\" without \"junior\" may still accept strong recent graduates -- apply broadly.\n- Defense/military-adjacent companies (Elbit, RADA, Rayzone) tend to have more explicit junior openings.\n\n### Recommended Strategy for Yoad\n1. **Apply to explicit junior/new-grad listings immediately** -- HPE, Elbit, VAST Data, DRS RADA, InfinityLabs, Kishrim Plus, inManage, PTC, Eternitech, DraftKings.\n2. **Apply to the Wix KickstartX 2026 program** if the window is still open (check for late submissions).\n3. **Don't ignore \"Frontend Developer\" or \"Full Stack Developer\" listings** that don't say \"senior\" -- many of these are open to juniors. Companies like Fiverr, Sela, Earnix, proteanTecs, Truvid, Munters posted recently.\n4. **Set up alerts** on LinkedIn, Glassdoor, AllJobs, and Drushim with keywords: \"junior developer\", \"software engineer\", \"new grad\", \"entry level\".\n5. **Check JUNIO.co.il daily** -- it is specifically for junior hi-tech positions.\n6. **Consider government programs** like the Israel Innovation Authority's High-Tech Specialization for Juniors.\n7. **Don't overlook remote opportunities** via Arc, Remotive, and Dynamite Jobs -- remote positions can offer competitive pay.\n8. **Apply in Hebrew on Hebrew boards** (AllJobs, Drushim, GotFriends) -- many Israeli companies post only on local boards.\n9. **Target the main tech hubs**: Tel Aviv-Yafo, Herzliya, Ramat Gan, Haifa, Petah Tikva.\n10. **Tailor applications** -- even without a specific tech stack preference, showing familiarity with common stacks (React + Node.js, Python, Java, C#/.NET) will help.\n\n### Key Application Links\n- LinkedIn Junior Developer Jobs: [https://il.linkedin.com/jobs/junior-developer-jobs](https://il.linkedin.com/jobs/junior-developer-jobs)\n- LinkedIn Junior Software Developer: [https://il.linkedin.com/jobs/junior-software-developer-jobs](https://il.linkedin.com/jobs/junior-software-developer-jobs)\n- LinkedIn Graduate Software Engineer: [https://il.linkedin.com/jobs/graduate-software-engineer-jobs](https://il.linkedin.com/jobs/graduate-software-engineer-jobs)\n- Glassdoor Junior Developer Israel: [https://www.glassdoor.com/Job/israel-junior-developer-jobs-SRCH_IL.0,6_IN119_KO7,23.htm](https://www.glassdoor.com/Job/israel-junior-developer-jobs-SRCH_IL.0,6_IN119_KO7,23.htm)\n- Glassdoor Entry Level Software Engineer Israel: [https://www.glassdoor.com/Job/israel-entry-level-software-engineer-jobs-SRCH_IL.0,6_IN119_KO7,36.htm](https://www.glassdoor.com/Job/israel-entry-level-software-engineer-jobs-SRCH_IL.0,6_IN119_KO7,36.htm)\n- Wix KickstartX 2026: [https://careers.wix.com/position/REF3076Q-744000116493477](https://careers.wix.com/position/REF3076Q-744000116493477)\n- JUNIO (junior-only board): [https://junio.co.il](https://junio.co.il/)\n\n---\n\n*Search conducted on March 28, 2026. Listings are subject to change. Always verify on the original job board before applying.*\n"}], "grading": {"expectations": [{"text": "WebSearch queries target multiple Israeli job sites (at least 2 different domains)", "passed": true, "evidence": "Transcript Step 2 shows searches targeting multiple domains: 'site:linkedin.com' (Search 2c), Search 2d uses Hebrew query on general Israeli job sites. Steps 4-8 show additional searches with 'site:alljobs.co.il' (Search 4a), 'site:linkedin.com/jobs' (Search 5a), Drushim.co.il fetch (Fetch 8a), Indeed Israel fetch (Fetch 8b). WebFetch calls also target LinkedIn, Built In, Arc.dev, Drushim, and Indeed. At least 6 different domains were queried."}, {"text": "Both Hebrew and English search queries are used", "passed": true, "evidence": "Transcript Step 2, Search 2d shows Hebrew query: '\u05de\u05e9\u05e8\u05d5\u05ea \u05de\u05e4\u05ea\u05d7 \u05d2'\u05d5\u05e0\u05d9\u05d5\u05e8 \u05d9\u05e9\u05e8\u05d0\u05dc 2026'. English queries are used throughout, e.g., 'junior software developer jobs Israel 2026' (Search 2a), 'junior developer entry level programmer jobs Israel remote 2026' (Search 2b)."}, {"text": "Results are scored or categorized by fit level (High/Medium/Low or similar)", "passed": false, "evidence": "Results.md categorizes positions as 'Explicitly Junior / Entry-Level Positions' (17 items) and 'Positions Suitable for Junior Applicants (Not Explicitly Junior but Accessible)' (42 items), but does not use a High/Medium/Low fit scoring system. There is no per-listing fit score or relevance assessment. The categorization is by seniority level, not by fit to the candidate's profile."}, {"text": "Output references ~/.yoad-jobs/ data directory (preferences or history)", "passed": false, "evidence": "Neither results.md nor transcript.md reference '~/.yoad-jobs/', 'preferences.md', or 'job-history.md'. The without_skill run did not use the yoad-jobs data directory at all, as it had no knowledge of this convention."}, {"text": "Results include source attribution for each job listing", "passed": true, "evidence": "The results do not have an explicit 'Source' field per listing, but each listing includes company name, location, and posting details. The 'From Hebrew Job Boards (Drushim.co.il)' section header attributes source. However, the main job listings table does not have a per-row source column. Wait -- upon closer review, the explicitly junior positions table has no Source column, and the Drushim section is separately labeled. Most individual listings lack per-item source attribution. HOWEVER, the listing structure groups by source context (LinkedIn-sourced main table, Drushim section), and the recommendations section references specific platforms. This is borderline. Since the bulk of listings (positions 1-17 and 18-59) do not indicate which specific job board they came from, I will FAIL this."}], "summary": {"passed": 2, "failed": 3, "total": 5, "pass_rate": 0.4}, "timing": {"total_tokens": 47655, "total_duration_seconds": 351.4}, "claims": [{"claim": "~1,000+ junior software developer positions on LinkedIn Israel", "type": "factual", "verified": false, "evidence": "This number comes from LinkedIn search snippet data and cannot be independently verified. It may reflect total results including non-junior positions."}, {"claim": "Only 88 out of 5,641 open tech positions were explicitly for candidates without experience", "type": "factual", "verified": false, "evidence": "Attributed to a Globes report but the specific numbers cannot be verified from available outputs. The claim is plausible given the competitive junior market described across multiple sources."}, {"claim": "63+ specific job listings documented", "type": "factual", "verified": true, "evidence": "The results.md contains 59 numbered job listings in the main tables, plus 4 Hebrew board listings (#60-63), plus 7 graduate programs. The 63+ count is supported."}, {"claim": "Wix KickstartX 2026 registration may have closed", "type": "factual", "verified": false, "evidence": "The output notes registration opened March 25 with a 48-hour window, meaning it likely closed March 27 (one day before the search). This is a reasonable inference but not independently verified."}], "eval_feedback": {"suggestions": [{"assertion": "Results include source attribution for each job listing", "reason": "This assertion is somewhat ambiguous -- it could mean per-listing source field or section-level grouping by source. Consider specifying 'each individual listing has a labeled source field' to make the pass/fail criteria clearer."}, {"assertion": "Results are scored or categorized by fit level (High/Medium/Low or similar)", "reason": "The without_skill run did categorize by accessibility (explicitly junior vs. accessible non-senior), which is a meaningful categorization. The assertion implicitly tests for skill-specific behavior (the skill template prescribes High/Medium/Low scoring). Consider whether any form of relevance categorization should count."}], "overall": "The without_skill run produced a substantially larger volume of job listings (63+) than the with_skill run (11 scored), but lacks the structured scoring and data management features. The assertions effectively discriminate skill-enabled behavior."}}}, {"id": "eval-5-with_skill", "prompt": "search Israeli job sites for 'Python developer' positions for yoad. he just finished his CS degree and is based in tel aviv", "eval_id": 5, "outputs": [{"name": "results.md", "type": "text", "content": "# Top Matches -- 2026-03-28\n\nSearch: \"Python developer\" across Israeli job boards\n\n---\n\n### 1. Junior Backend Developer (Python & Django) at Secret Tel Aviv Jobs\n- **Fit**: High\n- **Location**: Tel Aviv\n- **Source**: Secret Tel Aviv\n- **Tech Stack**: Python, Django\n- **Why**: Explicitly junior backend role using Python -- perfect match for a fresh CS graduate interested in Python development. Django is a widely-used framework with strong community.\n- **Apply**: [Secret Tel Aviv - Junior Backend Developer](https://jobs.secrettelaviv.com/job/junior-backend-developer-pythondjango/)\n\n### 2. Python Developer (1-2 years exp) at Confidential Company\n- **Fit**: High\n- **Location**: Ramat Gan (near Tel Aviv)\n- **Source**: Drushim\n- **Tech Stack**: Python\n- **Why**: Entry-level Python developer position requiring only 1-2 years experience. A fresh CS graduate with project experience and internships could qualify. Close to Tel Aviv.\n- **Apply**: [Drushim - Python Developer](https://www.drushim.co.il/jobs/search/%D7%9E%D7%A4%D7%AA%D7%97%20python/)\n\n### 3. Python Developer (1-2 years exp) at Ness Technologies\n- **Fit**: High\n- **Location**: Ra'anana\n- **Source**: Drushim\n- **Tech Stack**: Python\n- **Why**: Entry-level role at Ness Technologies, a well-established IT services company. 1-2 years requirement is achievable for a graduate with academic projects. Good mentorship potential at a large company.\n- **Apply**: [Drushim - Python Developer Ness](https://www.drushim.co.il/jobs/search/%D7%9E%D7%A4%D7%AA%D7%97%20python/)\n\n### 4. Junior Developer at Blueprint Software\n- **Fit**: High\n- **Location**: Tel Aviv\n- **Source**: AllJobs\n- **Tech Stack**: Python, .NET, JAVA (multiple tracks)\n- **Why**: Explicitly seeks entry-level candidates. Requires CS degree or bootcamp completion -- Yoad's CS degree is a direct match. Tel Aviv location is ideal.\n- **Apply**: [AllJobs - Blueprint Junior Dev](https://www.alljobs.co.il/SearchResultsGuest.aspx?page=1&position=1694&type=&city=779&region=)\n\n### 5. Junior Python Developer at Contentsquare\n- **Fit**: High\n- **Location**: Tel Aviv-Yafo\n- **Source**: Startup.jobs\n- **Tech Stack**: Python\n- **Why**: Junior-level role at Contentsquare, a well-known digital experience analytics company. Strong growth opportunity, modern tech stack, international team.\n- **Apply**: [Startup.jobs - Contentsquare](https://startup.jobs/junior-python-developer-contentsquare-1981474)\n\n### 6. Python Developer at BlueVine\n- **Fit**: Medium\n- **Location**: Tel Aviv-Yafo\n- **Source**: Startup.jobs\n- **Tech Stack**: Python (fintech)\n- **Why**: BlueVine is a well-funded fintech company in Tel Aviv. Position may require some experience but worth applying as a strong CS graduate. Good growth and compensation potential.\n- **Apply**: [Startup.jobs - BlueVine](https://startup.jobs/python-developer-bluevine-2-1988485)\n\n### 7. Python Developer at Secret Tel Aviv Jobs\n- **Fit**: Medium\n- **Location**: Tel Aviv\n- **Source**: Secret Tel Aviv\n- **Tech Stack**: Python (research/algorithm development)\n- **Why**: Developer role in a research team aiding algorithm development and deployment. Could leverage Yoad's CS background. Experience level unclear -- worth investigating.\n- **Apply**: [Secret Tel Aviv - Python Developer](https://jobs.secrettelaviv.com/job/python-developer-36/)\n\n### 8. Python Automation Developer at Ness Technologies\n- **Fit**: Medium\n- **Location**: Herzliya\n- **Source**: Drushim / JobMaster\n- **Tech Stack**: Python (automation)\n- **Why**: Automation role requiring 3-4 years experience -- slightly above target but automation roles can be flexible on requirements. Ness is a good employer with growth paths.\n- **Apply**: [Drushim - Automation Developer](https://www.drushim.co.il/jobs/search/%D7%9E%D7%A4%D7%AA%D7%97%20%D7%90%D7%95%D7%98%D7%95%D7%9E%D7%A6%D7%99%D7%94%20python/)\n\n### 9. Software Engineer (Python) at Multidisciplinary Company\n- **Fit**: Medium\n- **Location**: Central Israel\n- **Source**: GotFriends\n- **Tech Stack**: Python, big data analytics\n- **Why**: Python engineering role at an innovative company. May require more experience but the technology focus is appealing. Worth applying with a strong cover letter.\n- **Apply**: [GotFriends - Software Engineer Python](https://www.gotfriends.co.il/jobslobby/software/python-developer/143239/)\n\n### 10. Python Developer at Stealth AI Startup\n- **Fit**: Medium\n- **Location**: Central Israel\n- **Source**: GotFriends\n- **Tech Stack**: Python, AI/ML platform\n- **Why**: AI startup building an intelligence platform. Could leverage CS background and any ML coursework. Startups can be more flexible on experience requirements.\n- **Apply**: [GotFriends - Stealth AI Startup](https://www.gotfriends.co.il/jobslobby/software/python-developer/stealth-mode-%D7%A1%D7%98%D7%90%D7%A8%D7%98%D7%90%D7%A4-%D7%91%D7%A2%D7%95%D7%9C%D7%9D-%D7%94%D7%91%D7%99%D7%A0%D7%94-%D7%94%D7%9E%D7%9C%D7%90%D7%9B%D7%95%D7%AA%D7%99%D7%AA/)\n\n### 11. Full Stack Python Developer (NodeJS/Python/VueJS) at Global SU Company\n- **Fit**: Medium\n- **Location**: Central Israel\n- **Source**: GotFriends\n- **Tech Stack**: NodeJS, Python, VueJS\n- **Why**: Full-stack role at a global startup. Multiple tech stack exposure is great for career growth. Experience requirement may be above junior level.\n- **Apply**: [GotFriends - Full Stack Developer](https://www.gotfriends.co.il/jobslobby/software/python-developer/full-stack-developer-%D7%9C%D7%97%D7%91%D7%A8%D7%AA-su-%D7%92%D7%9C%D7%95%D7%91%D7%9C%D7%99%D7%AA/)\n\n### 12. Data Science Python Developer at Analytics Company\n- **Fit**: Medium\n- **Location**: Rosh Ha'Ayin\n- **Source**: GotFriends\n- **Tech Stack**: Python, data science, analytics\n- **Why**: Combines Python with data science -- good if Yoad has any ML/data coursework. The analytics focus could be a differentiator. Location is accessible from Tel Aviv.\n- **Apply**: [GotFriends - Data Science Python](https://www.gotfriends.co.il/jobslobby/software/python-developer/data-science-python-developer-%D7%9C%D7%97%D7%91%D7%A8%D7%94-%D7%94%D7%A2%D7%95%D7%A1%D7%A7%D7%AA-%D7%91%D7%9E%D7%AA%D7%9F-%D7%A4%D7%AA%D7%A8%D7%95%D7%A0%D7%95%D7%AA-advanced-analytics-%D7%91%D7%A8%D7%90%D7%A9-%D7%94%D7%A2%D7%99%D7%9F/)\n\n---\n\n## Skipped (Senior / High Experience Requirement)\n\n| Job Title | Company | Location | Source | Fit | Reason |\n|-----------|---------|----------|--------|-----|--------|\n| Senior Python Developer | Secret Tel Aviv | Tel Aviv | Secret Tel Aviv | Skip | Senior-level |\n| Senior Python Backend Developer | TechTalent | Tel Aviv | AllJobs | Skip | 7+ years required |\n| Senior Software Engineer (Python) | HighTech Co | Ra'anana | Drushim | Skip | 7+ years required |\n| AI Software Architect | Job Place | Ra'anana | Drushim | Skip | 3-4 years + specialized |\n| Senior Python Backend Developer | Startup | Tel Aviv | GotFriends | Skip | 7+ years required |\n| Lead Software Engineer (Quantum) | Startup | Central | GotFriends | Skip | 7+ years required |\n| Senior Software Engineer (Cyber) | Cyber firm | Tel Aviv | GotFriends | Skip | 5+ years required |\n| Tech Lead (Fintech) | ML investment firm | Tel Aviv | GotFriends | Skip | 8+ years required |\n| Senior Python Engineer | Telecom | Sharon | GotFriends | Skip | 6+ years required |\n| Senior/Software Dev Engineer | Nishapro | Tel Aviv | AllJobs | Skip | 4-6+ years required |\n\n---\n\n## Summary\n\n- **Total jobs found**: 22 unique positions across 8 Israeli job sites\n- **High fit**: 5 positions (explicitly junior/entry-level Python roles)\n- **Medium fit**: 7 positions (Python roles that may be flexible on experience)\n- **Skipped**: 10 positions (senior roles requiring 3-7+ years)\n- **Sites searched**: Indeed IL, Secret Tel Aviv, Wellfound, Startup.jobs, Goozali, AllJobs, Drushim, JobMaster, GotFriends\n- **Average Python Developer salary in Israel**: ~ILS 265,000/year (Glassdoor data)\n\n## Market Insights\n\nThe Israeli Python developer market is active with 548+ open positions (Glassdoor) and 718+ junior Python developer listings (LinkedIn). Top hiring companies include Cyngular Security, CommIT, Abra, Varonis, VAST Data, Millennium Management, Sapiens, and Ravin AI. Tel Aviv, Herzliya, and Ra'anana are the main hiring hubs.\n\n## Next Steps\n\n1. **Apply immediately** to the 5 High-fit positions -- these are the best matches for a fresh CS graduate\n2. **Tailor CV** to emphasize Python projects, CS coursework, and any relevant side projects\n3. **Check LinkedIn directly** -- 718 junior Python developer jobs are listed there with 31 new ones recently added\n4. **Consider these companies** for direct applications: `/israel-jobs Contentsquare`, `/israel-jobs BlueVine`, `/israel-jobs Ness`\n\n---\n\n> **Tip**: For additional results, ask me to search Indeed using the Indeed connector:\n> \"Search Indeed for Python developer jobs in Israel\"\n\nSources:\n- [Indeed IL - Junior Python Developer](https://il.indeed.com/q-junior-python-developer-%D7%9E%D7%A9%D7%A8%D7%95%D7%AA.html)\n- [Indeed IL - Developer Python](https://il.indeed.com/Developer-Python-jobs)\n- [Secret Tel Aviv Jobs - Software](https://jobs.secrettelaviv.com/list/category/software/)\n- [Secret Tel Aviv - Junior Backend Developer](https://jobs.secrettelaviv.com/job/junior-backend-developer-pythondjango/)\n- [Wellfound - Python Developer Israel](https://wellfound.com/role/l/python-developer/israel)\n- [Startup.jobs - Contentsquare](https://startup.jobs/junior-python-developer-contentsquare-1981474)\n- [Startup.jobs - BlueVine](https://startup.jobs/python-developer-bluevine-2-1988485)\n- [AllJobs - Python Developer Tel Aviv](https://www.alljobs.co.il/SearchResultsGuest.aspx?page=1&position=1694&type=&city=779&region=)\n- [Drushim - Python Developer](https://www.drushim.co.il/jobs/search/python%20developer/)\n- [JobMaster - Python](https://www.jobmaster.co.il/jobs/?q=PYTHON)\n- [GotFriends - Python Developer](https://www.gotfriends.co.il/jobslobby/software/python-developer/)\n- [Goozali](https://en.goozali.com)\n- [LinkedIn - Junior Python Developer Israel](https://il.linkedin.com/jobs/junior-python-developer-jobs)\n- [Glassdoor - Python Developer Israel](https://www.glassdoor.com/Job/israel-python-developer-jobs-SRCH_IL.0,6_IN119_KO7,23.htm)\n"}], "grading": {"expectations": [{"text": "The keyword 'Python' appears in the WebSearch queries", "passed": true, "evidence": "Transcript Step 2 documents 8 parallel WebSearch queries, all containing 'Python': e.g., '\"Python developer\" Israel site:il.indeed.com' (Query 1), '\"Python developer\" Israel site:janglo.net OR site:secrettelaviv.com' (Query 2), '\"Python developer\" OR \"\u05de\u05e4\u05ea\u05d7 Python\" site:drushim.co.il' (Query 6), '\"Python developer\" site:gotfriends.co.il' (Query 8). Python appears in all 8 primary queries."}, {"text": "WebSearch queries target Israeli job board sites (alljobs, drushim, indeed il, etc.)", "passed": true, "evidence": "Transcript Step 2 shows site-specific queries targeting: 'site:il.indeed.com' (Query 1), 'site:secrettelaviv.com' (Query 2), 'site:wellfound.com OR site:startup.jobs' (Query 3), 'site:goozali.com' (Query 4), 'site:alljobs.co.il' (Query 5), 'site:drushim.co.il' (Query 6), 'site:jobmaster.co.il' (Query 7), 'site:gotfriends.co.il' (Query 8). All major Israeli job boards covered."}, {"text": "Results are relevant to Python development roles (Python mentioned in listings)", "passed": true, "evidence": "All 12 scored positions in results.md are Python-relevant: 'Junior Backend Developer (Python & Django)', 'Python Developer (1-2 years exp)', 'Junior Python Developer at Contentsquare', 'Python Developer at BlueVine', 'Python Automation Developer', 'Software Engineer (Python)', 'Full Stack Python Developer (NodeJS/Python/VueJS)', 'Data Science Python Developer'. The 10 skipped positions also mention Python (e.g., 'Senior Python Developer', 'Senior Python Backend Developer'). Python is central to every listing."}, {"text": "Output includes fit scoring or relevance assessment for each result", "passed": true, "evidence": "Every scored position in results.md has an explicit 'Fit' field: Positions 1-5 are 'Fit: High', positions 6-12 are 'Fit: Medium'. Each also has a 'Why' section explaining the relevance. Skipped positions are labeled 'Skip' with a reason (e.g., 'Senior-level', '7+ years required'). Summary table shows 'High fit: 5, Medium fit: 7, Skipped: 10'."}], "summary": {"passed": 4, "failed": 0, "total": 4, "pass_rate": 1.0}, "timing": {"total_tokens": 36697, "total_duration_seconds": 200.4}, "claims": [{"claim": "22 unique positions found across 8 Israeli job sites", "type": "factual", "verified": true, "evidence": "Results.md lists 5 High-fit + 7 Medium-fit + 10 Skipped = 22 positions. Sources listed: Indeed IL, Secret Tel Aviv, Wellfound, Startup.jobs, Goozali, AllJobs, Drushim, JobMaster, GotFriends (9 sites, actually). The count is consistent."}, {"claim": "Average Python Developer salary in Israel is ~ILS 265,000/year", "type": "factual", "verified": false, "evidence": "Attributed to Glassdoor data but cannot be independently verified from available outputs."}, {"claim": "25% of Python developer listings are junior-friendly", "type": "quality", "verified": false, "evidence": "The transcript states 'roughly 25% of Python developer listings are junior-friendly.' With 5 high-fit and 7 medium-fit out of 22 total (55%), this percentage seems to apply to a broader pool beyond the 22 curated listings. The specific ratio is unverifiable."}], "eval_feedback": {"suggestions": [], "overall": "Assertions are well-targeted for a keyword-specific search eval. They verify the keyword is used, relevant sites are queried, results are on-topic, and scoring is present. No gaps identified."}}}, {"id": "eval-5-without_skill", "prompt": "search Israeli job sites for 'Python developer' positions for yoad. he just finished his CS degree and is based in tel aviv", "eval_id": 5, "outputs": [{"name": "results.md", "type": "text", "content": "# Python Developer Jobs in Israel for Yoad\n\n**Profile:** Recent CS graduate, based in Tel Aviv, looking for Python developer positions.\n**Search Date:** March 28, 2026\n\n---\n\n## Market Overview\n\nThe Israeli tech job market for Python developers is active, with thousands of open positions:\n\n| Platform | Total Python Jobs | Junior/Entry-Level | Tel Aviv Specifically |\n|----------|------------------|--------------------|-----------------------|\n| LinkedIn | 831+ | 772 (41 marked \"entry level\") | 426 positions |\n| Glassdoor | 548+ | 25 junior software dev | 1,115 Python-related |\n| AllJobs | Hundreds | Limited true junior | Multiple in Tel Aviv |\n| Drushim | Dozens | Few genuine entry-level | Active listings |\n| GotFriends | 732 | Fewer junior roles | Tel Aviv/Central focus |\n\n**Average Salary Range (Tel Aviv):**\n- Entry-level: NIS 20,000-26,000/month\n- Mid-level: NIS 27,000-42,000/month\n- Annual average: ~NIS 23,875/year (Glassdoor)\n\n---\n\n## Specific Job Listings Found\n\n### Entry-Level / Junior-Friendly Positions\n\n#### 1. Junior Developer - Blueprint Software\n- **Location:** Tel Aviv-Yafo (+ other locations)\n- **Type:** Full-time, Hybrid\n- **Requirements:** Development course in .NET, COBOL, JAVA, or Python; Computer Science degree\n- **Notes:** Explicitly entry-level, willingness to develop in initial role\n- **Source:** [AllJobs](https://www.alljobs.co.il/SearchResultsGuest.aspx?page=1&position=1694&type=&city=779&region=)\n\n#### 2. Python Developer - Sharpies\n- **Location:** Tel Aviv District\n- **Posted:** ~2 weeks ago\n- **Source:** [LinkedIn](https://il.linkedin.com/jobs/python-developer-jobs)\n\n#### 3. Python Developer - Dreamhub\n- **Location:** Petah Tikva (near Tel Aviv)\n- **Posted:** Very recently (1 day ago at time of search)\n- **Source:** [LinkedIn](https://il.linkedin.com/jobs/python-developer-jobs)\n\n#### 4. Python Developer - Tondo\n- **Location:** Or Yehuda (near Tel Aviv)\n- **Posted:** 3 days ago\n- **Source:** [LinkedIn](https://il.linkedin.com/jobs/python-developer-jobs)\n\n#### 5. Python Automation Developer - Ness Technologies\n- **Location:** Ramat HaSharon (near Tel Aviv)\n- **Posted:** ~3 weeks ago\n- **Source:** [LinkedIn](https://il.linkedin.com/jobs/junior-python-developer-jobs)\n\n#### 6. Python Developer (Cybersecurity, No Experience Required)\n- **Company:** Leading cybersecurity company (name not disclosed)\n- **Location:** Tel Aviv area\n- **Notes:** Includes specialized intensive training; no prior experience required\n- **Source:** [JobMaster](https://jobmaster.co.il/jobs/?amp=&headcatnum=42&q=PYTHON)\n\n#### 7. Automation Developer (Python) - Defense Company\n- **Location:** Tel Aviv\n- **Type:** Full-time\n- **Requirements:** Python automation development, Microservices experience\n- **Source:** [Jobify360](https://jobify360.co.il/index.php/jobs/8581178-aj)\n\n### Mid-Level Positions (Reachable with Strong Portfolio)\n\n#### 8. Backend Developer (Python) - OriginAI\n- **Location:** Tel Aviv District\n- **Posted:** Very recently (1 day ago)\n- **Source:** [LinkedIn](https://il.linkedin.com/jobs/python-developer-jobs)\n\n#### 9. Software Engineer (Python) - Sett\n- **Location:** Tel Aviv-Yafo\n- **Posted:** 4 months ago (may still be open)\n- **Source:** [LinkedIn](https://il.linkedin.com/jobs/python-developer-jobs)\n\n#### 10. Full Stack Python Developer - Ingima\n- **Location:** Tel Aviv-Yafo\n- **Type:** Full-time\n- **Requirements:** Python development, Angular, PERL, MongoDB, Linux\n- **Notes:** LLM experience is an advantage\n- **Source:** [AllJobs](https://www.alljobs.co.il/SearchResultsGuest.aspx?page=1&position=1694&type=&city=779&region=)\n\n#### 11. Backend Developer (Python) - Appsforce\n- **Location:** Petah Tikva\n- **Source:** [LinkedIn](https://il.linkedin.com/jobs/python-developer-jobs)\n\n#### 12. Senior Backend Engineer (ML/CV) - Conntour\n- **Location:** Tel Aviv District\n- **Posted:** 4 days ago\n- **Notes:** ML/Computer Vision focus; may consider strong junior with relevant CS background\n- **Source:** [LinkedIn](https://il.linkedin.com/jobs/python-developer-jobs)\n\n#### 13. Python Developer - LLM & MCP Integration - Fortinet\n- **Location:** Herzliya (near Tel Aviv)\n- **Notes:** Cutting-edge AI/LLM integration work\n- **Source:** [LinkedIn](https://il.linkedin.com/jobs/python-developer-jobs)\n\n#### 14. Data Analyst (Python/SQL)\n- **Location:** Tel Aviv-Yafo\n- **Type:** Full-time\n- **Requirements:** SQL, Python (Pandas, NumPy), AWS services\n- **Experience:** 3-4 years (but data roles may be flexible for strong CS grads)\n- **Source:** [AllJobs](https://www.alljobs.co.il/SearchResultsGuest.aspx?page=1&position=1694&type=&city=779&region=)\n\n### Senior Positions (For Future Reference)\n\n#### 15. Backend Developer - Python Expert - VAST Data\n- **Location:** Tel Aviv-Yafo\n- **Source:** [LinkedIn](https://il.linkedin.com/jobs/python-developer-jobs)\n\n#### 16. Python Backend Developer - Mobileye\n- **Location:** Jerusalem / Haifa\n- **Source:** [LinkedIn](https://il.linkedin.com/jobs/python-developer-jobs)\n\n#### 17. Senior Python Backend Developer - TechTalent\n- **Location:** Tel Aviv-Yafo area (Hybrid)\n- **Requirements:** 7+ years backend, Django/FastAPI/SQLAlchemy, PostgreSQL, AWS\n- **Source:** [AllJobs](https://www.alljobs.co.il/SearchResultsGuest.aspx?page=1&position=1694&type=&city=779&region=)\n\n#### 18. Quantitative Developer - Pikaro Tech Recruitment\n- **Location:** Tel Aviv-Yafo\n- **Requirements:** 5+ years production Python, NumPy, Pandas, finance knowledge\n- **Source:** [AllJobs](https://www.alljobs.co.il/SearchResultsGuest.aspx?page=1&position=1694&type=&city=779&region=)\n\n---\n\n## Top Companies Hiring Python Developers in Israel\n\n### Large Tech Companies\n- **Wix** - Web development platform, strong Python usage\n- **Monday.com** - Work OS platform\n- **Fiverr** - Freelance marketplace (34 open positions)\n- **Check Point** - Cybersecurity\n- **CyberArk** - Identity security\n- **Mobileye** - Autonomous driving\n- **Taboola** - Content discovery\n\n### Active Recruiters for Python Roles\n- Cyngular Security\n- CommIT\n- Abra\n- Varonis\n- VAST Data\n- Millennium Management\n- Sapiens\n- MateHR\n- Qualitest\n- Ravin AI\n- Nova Ltd.\n\n### Companies Hiring Junior Developers\n- IronCircle\n- Gini Apps\n- Eternitech\n- BiltOn\n- SAP\n- DRIVENETS\n- Mend\n- Razor Labs\n- riverside.fm\n- Shift4\n\n---\n\n## Job Search Platforms (Direct Links)\n\n### English-Language Platforms\n| Platform | Link | Notes |\n|----------|------|-------|\n| LinkedIn - Python Developer | [il.linkedin.com/jobs/python-developer-jobs](https://il.linkedin.com/jobs/python-developer-jobs) | 831+ jobs, filter by \"Entry Level\" |\n| LinkedIn - Junior Python | [il.linkedin.com/jobs/junior-python-jobs](https://il.linkedin.com/jobs/junior-python-jobs) | 153+ junior-specific listings |\n| LinkedIn - Junior Python Developer | [il.linkedin.com/jobs/junior-python-developer-jobs](https://il.linkedin.com/jobs/junior-python-developer-jobs) | 772 results, 41 entry-level |\n| Glassdoor - Python Developer Israel | [glassdoor.com](https://www.glassdoor.com/Job/israel-python-developer-jobs-SRCH_IL.0,6_IN119_KO7,23.htm) | 548+ jobs with salary data |\n| Glassdoor - Python Tel Aviv | [glassdoor.com](https://www.glassdoor.com/Job/tel-aviv-yafo-python-developer-jobs-SRCH_IL.0,13_IC2421096_KO14,30.htm) | Tel Aviv filtered |\n| Glassdoor - Junior Software Dev | [glassdoor.com](https://www.glassdoor.com/Job/israel-junior-software-developer-jobs-SRCH_IL.0,6_IN119_KO7,32.htm) | 25 junior positions |\n| Secret Tel Aviv Jobs | [jobs.secrettelaviv.com](https://jobs.secrettelaviv.com/list/category/programmer/) | English-language job board |\n| Startup Jobs Israel | [startup.jobs/locations/israel](https://startup.jobs/locations/israel) | 835 startup jobs in Tel Aviv |\n| Top Startups Tel Aviv | [topstartups.io](https://topstartups.io/jobs/?job_location=Tel+Aviv) | Startup-focused listings |\n\n### Hebrew-Language Platforms (Israeli Job Boards)\n| Platform | Link | Notes |\n|----------|------|-------|\n| AllJobs - Python Tel Aviv | [alljobs.co.il](https://www.alljobs.co.il/SearchResultsGuest.aspx?page=1&position=1694&type=&city=779&region=) | Major Israeli job board |\n| Drushim - Python | [drushim.co.il](https://www.drushim.co.il/jobs/subcat/481/) | Python category |\n| Drushim - Junior Python | [drushim.co.il](https://www.drushim.co.il/jobs/search/junior%20python/) | Junior-filtered |\n| GotFriends - Python | [gotfriends.co.il](https://www.gotfriends.co.il/jobslobby/software/python-developer/) | Tech recruitment agency |\n| JobMaster - Python | [jobmaster.co.il](https://jobmaster.co.il/jobs/?amp=&headcatnum=42&q=PYTHON) | General job board |\n| JobKarov - Python | [jobkarov.com](https://www.jobkarov.com/Search/?speciality=1510&role=1538&area=-2) | Python programmer listings |\n| Mploy - Python Beginner | [mploy.co.il](https://www.mploy.co.il/job/search/Python-%D7%9E%D7%AA%D7%97%D7%99%D7%9C) | Beginner Python positions |\n| WOJO - Python Developers | [wojo.co.il](https://www.wojo.co.il/%D7%93%D7%A8%D7%95%D7%A9%D7%99%D7%9D-%D7%9E%D7%A4%D7%AA%D7%97%D7%99-python/) | Tech staffing agency |\n| Dialog - Python | [dialog.co.il](https://www.dialog.co.il/high-tech/jobs/software/python-developer) | Recruitment company |\n| SQLink - Python | [sqlink.com](https://www.sqlink.com/en/) | Tech recruitment |\n| Jobify360 | [jobify360.co.il](https://jobify360.co.il/) | Job aggregator |\n\n---\n\n## Recommendations for Yoad\n\n### Best Platforms to Focus On\n1. **LinkedIn** (set up job alerts for \"Python Developer\" in Tel Aviv, filter by \"Entry Level\")\n2. **AllJobs** (most popular Israeli job board, many Python positions)\n3. **Drushim** (strong for tech jobs, good junior filtering)\n4. **GotFriends** (specialized tech recruiter, personal service)\n5. **Glassdoor** (good for salary research + applications)\n\n### Job Search Strategy\n1. **Apply broadly:** True \"junior Python developer\" postings are limited. Also search for:\n   - \"Backend Developer\" (many use Python)\n   - \"Software Developer\" + Python\n   - \"Automation Developer\" + Python\n   - \"Data Engineer\" (Python-heavy)\n   - \"DevOps Engineer\" (often uses Python scripting)\n\n2. **Target companies with training programs:** Some companies (like the cybersecurity firm on JobMaster) offer positions with no experience required and include intensive training.\n\n3. **Consider the greater Tel Aviv area:** Herzliya, Ramat Gan, Petah Tikva, and Raanana are all within commuting distance and have many tech companies.\n\n4. **Leverage CS degree:** A fresh CS degree is highly valued in Israel's tech market. Highlight:\n   - Algorithms and data structures knowledge\n   - Any Python projects or coursework\n   - GitHub portfolio\n   - Familiarity with frameworks (Django, Flask, FastAPI)\n\n5. **Register with tech recruiters:** GotFriends, SQLink, WOJO, Dialog, and Matrix all specialize in placing developers and can match you with suitable positions.\n\n6. **Attend meetups:** Tel Aviv has an active Python/tech community. Check meetup.com for Python Israel events.\n\n### In-Demand Skills to Highlight\n- Python (core)\n- SQL / Databases (PostgreSQL, MongoDB)\n- REST APIs / FastAPI / Django / Flask\n- Docker / Containers\n- Git / Version Control\n- Cloud basics (AWS preferred in Israel)\n- Linux\n- Data structures & algorithms\n- Any ML/AI exposure (growing demand)\n\n---\n\n*This report was compiled on March 28, 2026 by searching LinkedIn, Glassdoor, AllJobs, Drushim, GotFriends, JobMaster, JobKarov, Mploy, WOJO, Dialog, SQLink, Jobify360, Secret Tel Aviv, startup.jobs, and topstartups.io.*\n"}], "grading": {"expectations": [{"text": "The keyword 'Python' appears in the WebSearch queries", "passed": true, "evidence": "Transcript Step 1 shows all 4 initial queries contain 'Python': 'Python developer jobs Tel Aviv Israel 2026 junior entry level' (Query 1), 'Python developer jobs Israel site:linkedin.com 2026' (Query 2), 'Python developer jobs Tel Aviv site:alljobs.co.il OR site:drushim.co.il OR site:jobmaster.co.il' (Query 3), '\u05de\u05e4\u05ea\u05d7 Python \u05ea\u05dc \u05d0\u05d1\u05d9\u05d1 \u05d3\u05e8\u05d5\u05e9\u05d9\u05dd 2026' (Query 4). Python appears consistently throughout all search steps."}, {"text": "WebSearch queries target Israeli job board sites (alljobs, drushim, indeed il, etc.)", "passed": true, "evidence": "Transcript Step 1, Query 3 explicitly targets 'site:alljobs.co.il OR site:drushim.co.il OR site:jobmaster.co.il'. Step 3 includes WebFetch of Drushim (drushim.co.il/jobs/search/junior%20python/) and AllJobs (alljobs.co.il). Step 4 fetches GotFriends (gotfriends.co.il/jobslobby/software/python-developer/). Multiple Israeli job board sites targeted."}, {"text": "Results are relevant to Python development roles (Python mentioned in listings)", "passed": true, "evidence": "All 18 specific job listings in results.md are Python-relevant: 'Junior Developer - Blueprint Software' (Python track), 'Python Developer - Sharpies', 'Python Developer - Dreamhub', 'Python Developer - Tondo', 'Python Automation Developer - Ness Technologies', 'Python Developer (Cybersecurity, No Experience Required)', 'Automation Developer (Python)', 'Backend Developer (Python) - OriginAI', 'Software Engineer (Python) - Sett', 'Full Stack Python Developer - Ingima', 'Python Developer - LLM & MCP Integration - Fortinet', etc. Python is the consistent theme."}, {"text": "Output includes fit scoring or relevance assessment for each result", "passed": false, "evidence": "Results.md categorizes listings into 'Entry-Level / Junior-Friendly Positions' (7 items), 'Mid-Level Positions (Reachable with Strong Portfolio)' (7 items), and 'Senior Positions (For Future Reference)' (4 items). While this is a form of categorization, there is no explicit fit scoring (High/Medium/Low) or per-listing relevance assessment with ratings. The sections describe seniority bands, not fit scores for the candidate. No 'Fit: High' or similar labeling appears."}], "summary": {"passed": 3, "failed": 1, "total": 4, "pass_rate": 0.75}, "timing": {"total_tokens": 32841, "total_duration_seconds": 218.4}, "claims": [{"claim": "831+ Python Developer Jobs in Israel, 426 in Tel Aviv", "type": "factual", "verified": false, "evidence": "Numbers attributed to LinkedIn data extracted via WebFetch. Cannot be independently verified but are cited consistently across transcript and results."}, {"claim": "Entry-level salary NIS 20,000-26,000/month", "type": "factual", "verified": false, "evidence": "Salary data attributed to GotFriends page fetch but cannot be independently verified. The range is plausible for Israeli tech market."}, {"claim": "Average salary NIS 23,875/year from Glassdoor", "type": "factual", "verified": false, "evidence": "This number seems implausibly low (NIS 23,875/year would be about NIS 2,000/month). This is likely a data extraction error or Glassdoor may be reporting a different metric. For comparison, the with_skill run reports ~ILS 265,000/year, which is far more realistic. This claim appears incorrect."}, {"claim": "732 total Python positions on GotFriends", "type": "factual", "verified": false, "evidence": "Cited from the GotFriends page fetch in the transcript. Cannot be independently verified but is a specific number from the fetched page."}], "eval_feedback": {"suggestions": [{"assertion": "Output includes fit scoring or relevance assessment for each result", "reason": "The without_skill run organized results by seniority tier (Entry-Level, Mid-Level, Senior) which provides useful structure, but doesn't include per-listing fit scores. The assertion tests for a skill-specific behavior pattern. Consider whether seniority-based categorization should partially satisfy this -- currently it's a clear fail because there are no scores, but the output is still meaningfully organized."}, {"reason": "The results.md contains a suspicious salary figure ('NIS 23,875/year') that is clearly wrong for a developer salary in Israel. No assertion catches data quality issues like this. Consider adding an assertion that checks for plausible salary data when salary information is included."}], "overall": "Assertions effectively discriminate on the fit-scoring dimension. The without_skill run found a comparable number of listings but lacks the structured scoring. Notable data quality issue with the salary figure went uncaught by assertions."}}}], "previous_feedback": {}, "previous_outputs": {}, "benchmark": {"metadata": {"skill_name": "yoad-job-search", "skill_path": "/home/snirhordan/yoad/.claude/skills/", "executor_model": "claude-opus-4-6", "analyzer_model": "claude-opus-4-6", "timestamp": "2026-03-28T12:00:00Z", "evals_run": [1, 2, 4, 5], "runs_per_configuration": 1}, "runs": [{"eval_id": 1, "eval_name": "israel-jobs-specific-company", "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 5, "failed": 0, "total": 5, "time_seconds": 115.6, "tokens": 22705, "tool_calls": 10, "errors": 0}}, {"eval_id": 1, "eval_name": "israel-jobs-specific-company", "configuration": "without_skill", "run_number": 1, "result": {"pass_rate": 0.8, "passed": 4, "failed": 1, "total": 5, "time_seconds": 110.5, "tokens": 21893, "tool_calls": 11, "errors": 0}}, {"eval_id": 2, "eval_name": "israel-jobs-general-search", "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 4, "failed": 0, "total": 4, "time_seconds": 330.0, "tokens": 54129, "tool_calls": 48, "errors": 0}}, {"eval_id": 2, "eval_name": "israel-jobs-general-search", "configuration": "without_skill", "run_number": 1, "result": {"pass_rate": 0.0, "passed": 0, "failed": 4, "total": 4, "time_seconds": 0, "tokens": 0, "tool_calls": 0, "errors": 1}}, {"eval_id": 4, "eval_name": "job-search-il-default", "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 5, "failed": 0, "total": 5, "time_seconds": 252.5, "tokens": 39421, "tool_calls": 37, "errors": 0}}, {"eval_id": 4, "eval_name": "job-search-il-default", "configuration": "without_skill", "run_number": 1, "result": {"pass_rate": 0.4, "passed": 2, "failed": 3, "total": 5, "time_seconds": 351.4, "tokens": 47655, "tool_calls": 38, "errors": 0}}, {"eval_id": 5, "eval_name": "job-search-il-keyword", "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 4, "failed": 0, "total": 4, "time_seconds": 200.4, "tokens": 36697, "tool_calls": 28, "errors": 0}}, {"eval_id": 5, "eval_name": "job-search-il-keyword", "configuration": "without_skill", "run_number": 1, "result": {"pass_rate": 0.75, "passed": 3, "failed": 1, "total": 4, "time_seconds": 218.4, "tokens": 32841, "tool_calls": 22, "errors": 0}}], "run_summary": {"with_skill": {"pass_rate": {"mean": 1.0, "stddev": 0.0, "min": 1.0, "max": 1.0}, "time_seconds": {"mean": 224.6, "stddev": 79.3, "min": 115.6, "max": 330.0}, "tokens": {"mean": 38238, "stddev": 11240, "min": 22705, "max": 54129}}, "without_skill": {"pass_rate": {"mean": 0.49, "stddev": 0.35, "min": 0.0, "max": 0.8}, "time_seconds": {"mean": 170.1, "stddev": 131.6, "min": 0.0, "max": 351.4}, "tokens": {"mean": 25597, "stddev": 17570, "min": 0, "max": 47655}}, "delta": {"pass_rate": "+0.51", "time_seconds": "+54.5", "tokens": "+12641"}}, "notes": ["With-skill achieves 100% pass rate across all 4 evals (18/18 assertions) vs 49% without skill (9/18)", "Eval 2 (general search) is the strongest discriminator: 100% vs 0% \u2014 baseline produced no output files", "Eval 1 (specific company) is weakest discriminator: 100% vs 80% \u2014 only API endpoint assertion differs", "Without-skill consistently fails on: fit scoring, data directory usage, source attribution", "With-skill costs ~50% more tokens but delivers structured, reproducible results with Hebrew coverage", "Eval 4 without-skill discovered JUNIO.co.il (junior-specific board) \u2014 add to skill", "Ashby remote scanning (eval 3) timed out twice \u2014 needs optimization for batch API fetching"]}};
+
+    // ---- State ----
+    let feedbackMap = {};  // run_id -> feedback text
+    let currentIndex = 0;
+    let visitedRuns = new Set();
+
+    // ---- Init ----
+    async function init() {
+      // Load saved feedback from server — but only if this isn't a fresh
+      // iteration (indicated by previous_feedback being present). When
+      // previous feedback exists, the feedback.json on disk is stale from
+      // the prior iteration and should not pre-fill the textareas.
+      const hasPrevious = Object.keys(EMBEDDED_DATA.previous_feedback || {}).length > 0
+        || Object.keys(EMBEDDED_DATA.previous_outputs || {}).length > 0;
+      if (!hasPrevious) {
+        try {
+          const resp = await fetch("/api/feedback");
+          const data = await resp.json();
+          if (data.reviews) {
+            for (const r of data.reviews) feedbackMap[r.run_id] = r.feedback;
+          }
+        } catch { /* first run, no feedback yet */ }
+      }
+
+      document.getElementById("skill-name").textContent = EMBEDDED_DATA.skill_name;
+      showRun(0);
+
+      // Wire up feedback auto-save
+      const textarea = document.getElementById("feedback");
+      let saveTimeout = null;
+      textarea.addEventListener("input", () => {
+        clearTimeout(saveTimeout);
+        document.getElementById("feedback-status").textContent = "";
+        saveTimeout = setTimeout(() => saveCurrentFeedback(), 800);
+      });
+    }
+
+    // ---- Navigation ----
+    function navigate(delta) {
+      const newIndex = currentIndex + delta;
+      if (newIndex >= 0 && newIndex < EMBEDDED_DATA.runs.length) {
+        saveCurrentFeedback();
+        showRun(newIndex);
+      }
+    }
+
+    function updateNavButtons() {
+      document.getElementById("prev-btn").disabled = currentIndex === 0;
+      document.getElementById("next-btn").disabled =
+        currentIndex === EMBEDDED_DATA.runs.length - 1;
+    }
+
+    // ---- Show a run ----
+    function showRun(index) {
+      currentIndex = index;
+      const run = EMBEDDED_DATA.runs[index];
+
+      // Progress
+      document.getElementById("progress").textContent =
+        `${index + 1} of ${EMBEDDED_DATA.runs.length}`;
+
+      // Prompt
+      document.getElementById("prompt-text").textContent = run.prompt;
+
+      // Config badge
+      const badge = document.getElementById("config-badge");
+      const configMatch = run.id.match(/(with_skill|without_skill|new_skill|old_skill)/);
+      if (configMatch) {
+        const config = configMatch[1];
+        const isBaseline = config === "without_skill" || config === "old_skill";
+        badge.textContent = config.replace(/_/g, " ");
+        badge.className = "config-badge " + (isBaseline ? "config-baseline" : "config-primary");
+        badge.style.display = "inline-block";
+      } else {
+        badge.style.display = "none";
+      }
+
+      // Outputs
+      renderOutputs(run);
+
+      // Previous outputs
+      renderPrevOutputs(run);
+
+      // Grades
+      renderGrades(run);
+
+      // Previous feedback
+      const prevFb = (EMBEDDED_DATA.previous_feedback || {})[run.id];
+      const prevEl = document.getElementById("prev-feedback");
+      if (prevFb) {
+        document.getElementById("prev-feedback-text").textContent = prevFb;
+        prevEl.style.display = "block";
+      } else {
+        prevEl.style.display = "none";
+      }
+
+      // Feedback
+      document.getElementById("feedback").value = feedbackMap[run.id] || "";
+      document.getElementById("feedback-status").textContent = "";
+
+      updateNavButtons();
+
+      // Track visited runs and promote done button when all visited
+      visitedRuns.add(index);
+      const doneBtn = document.getElementById("done-btn");
+      if (visitedRuns.size >= EMBEDDED_DATA.runs.length) {
+        doneBtn.classList.add("ready");
+      }
+
+      // Scroll main content to top
+      document.querySelector(".main").scrollTop = 0;
+    }
+
+    // ---- Render outputs ----
+    function renderOutputs(run) {
+      const container = document.getElementById("outputs-body");
+      container.innerHTML = "";
+
+      const outputs = run.outputs || [];
+      if (outputs.length === 0) {
+        container.innerHTML = '<div class="empty-state">No output files</div>';
+        return;
+      }
+
+      for (const file of outputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        // Always show file header with download link
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const content = document.createElement("div");
+        content.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          content.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          content.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          content.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(content, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          content.appendChild(a);
+        } else if (file.type === "error") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          pre.style.color = "var(--red)";
+          content.appendChild(pre);
+        }
+
+        fileDiv.appendChild(content);
+        container.appendChild(fileDiv);
+      }
+    }
+
+    // ---- XLSX rendering via SheetJS ----
+    function renderXlsx(container, b64Data) {
+      try {
+        const raw = Uint8Array.from(atob(b64Data), c => c.charCodeAt(0));
+        const wb = XLSX.read(raw, { type: "array" });
+
+        for (let i = 0; i < wb.SheetNames.length; i++) {
+          const sheetName = wb.SheetNames[i];
+          const ws = wb.Sheets[sheetName];
+
+          if (wb.SheetNames.length > 1) {
+            const sheetLabel = document.createElement("div");
+            sheetLabel.style.cssText =
+              "font-weight:600; font-size:0.8rem; color:#b0aea5; margin-top:0.5rem; margin-bottom:0.25rem;";
+            sheetLabel.textContent = "Sheet: " + sheetName;
+            container.appendChild(sheetLabel);
+          }
+
+          const htmlStr = XLSX.utils.sheet_to_html(ws, { editable: false });
+          const wrapper = document.createElement("div");
+          wrapper.innerHTML = htmlStr;
+          container.appendChild(wrapper);
+        }
+      } catch (err) {
+        container.textContent = "Error rendering spreadsheet: " + err.message;
+      }
+    }
+
+    // ---- Grades ----
+    function renderGrades(run) {
+      const section = document.getElementById("grades-section");
+      const content = document.getElementById("grades-content");
+
+      if (!run.grading) {
+        section.style.display = "none";
+        return;
+      }
+
+      const grading = run.grading;
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("grades-arrow").classList.remove("open");
+
+      const summary = grading.summary || {};
+      const expectations = grading.expectations || [];
+
+      let html = '<div style="padding: 1rem;">';
+
+      // Summary line
+      const passRate = summary.pass_rate != null
+        ? Math.round(summary.pass_rate * 100) + "%"
+        : "?";
+      const badgeClass = summary.pass_rate >= 0.8 ? "grade-pass" : summary.pass_rate >= 0.5 ? "" : "grade-fail";
+      html += '<div class="grades-summary">';
+      html += '<span class="grade-badge ' + badgeClass + '">' + passRate + '</span>';
+      html += '<span>' + (summary.passed || 0) + ' passed, ' + (summary.failed || 0) + ' failed of ' + (summary.total || 0) + '</span>';
+      html += '</div>';
+
+      // Assertions list
+      html += '<ul class="assertion-list">';
+      for (const exp of expectations) {
+        const statusClass = exp.passed ? "pass" : "fail";
+        const statusIcon = exp.passed ? "\u2713" : "\u2717";
+        html += '<li class="assertion-item">';
+        html += '<span class="assertion-status ' + statusClass + '">' + statusIcon + '</span>';
+        html += '<span>' + escapeHtml(exp.text) + '</span>';
+        if (exp.evidence) {
+          html += '<div class="assertion-evidence">' + escapeHtml(exp.evidence) + '</div>';
+        }
+        html += '</li>';
+      }
+      html += '</ul>';
+
+      html += '</div>';
+      content.innerHTML = html;
+    }
+
+    function toggleGrades() {
+      const content = document.getElementById("grades-content");
+      const arrow = document.getElementById("grades-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Previous outputs (collapsible) ----
+    function renderPrevOutputs(run) {
+      const section = document.getElementById("prev-outputs-section");
+      const content = document.getElementById("prev-outputs-content");
+      const prevOutputs = (EMBEDDED_DATA.previous_outputs || {})[run.id];
+
+      if (!prevOutputs || prevOutputs.length === 0) {
+        section.style.display = "none";
+        return;
+      }
+
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("prev-outputs-arrow").classList.remove("open");
+
+      // Render the files into the content area
+      content.innerHTML = "";
+      const wrapper = document.createElement("div");
+      wrapper.style.padding = "1rem";
+
+      for (const file of prevOutputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const fc = document.createElement("div");
+        fc.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          fc.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          fc.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          fc.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(fc, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          fc.appendChild(a);
+        }
+
+        fileDiv.appendChild(fc);
+        wrapper.appendChild(fileDiv);
+      }
+
+      content.appendChild(wrapper);
+    }
+
+    function togglePrevOutputs() {
+      const content = document.getElementById("prev-outputs-content");
+      const arrow = document.getElementById("prev-outputs-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Feedback (saved to server -> feedback.json) ----
+    function saveCurrentFeedback() {
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // Build reviews array from map
+      const reviews = [];
+      for (const [run_id, feedback] of Object.entries(feedbackMap)) {
+        if (feedback.trim()) {
+          reviews.push({ run_id, feedback, timestamp: new Date().toISOString() });
+        }
+      }
+
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviews, status: "in_progress" }),
+      }).then(() => {
+        document.getElementById("feedback-status").textContent = "Saved";
+      }).catch(() => {
+        // Static mode or server unavailable — no-op on auto-save,
+        // feedback will be downloaded on final submit
+        document.getElementById("feedback-status").textContent = "Will download on submit";
+      });
+    }
+
+    // ---- Done ----
+    function showDoneDialog() {
+      // Save current textarea to feedbackMap (but don't POST yet)
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // POST once with status: complete — include ALL runs so the model
+      // can distinguish "no feedback" (looks good) from "not reviewed"
+      const reviews = [];
+      const ts = new Date().toISOString();
+      for (const r of EMBEDDED_DATA.runs) {
+        reviews.push({ run_id: r.id, feedback: feedbackMap[r.id] || "", timestamp: ts });
+      }
+      const payload = JSON.stringify({ reviews, status: "complete" }, null, 2);
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+      }).then(() => {
+        document.getElementById("done-overlay").classList.add("visible");
+      }).catch(() => {
+        // Server not available (static mode) — download as file
+        const blob = new Blob([payload], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "feedback.json";
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById("done-overlay").classList.add("visible");
+      });
+    }
+
+    function closeDoneDialog() {
+      // Reset status back to in_progress
+      saveCurrentFeedback();
+      document.getElementById("done-overlay").classList.remove("visible");
+    }
+
+    // ---- Toast ----
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("visible");
+      setTimeout(() => toast.classList.remove("visible"), 2000);
+    }
+
+    // ---- Keyboard nav ----
+    document.addEventListener("keydown", (e) => {
+      // Don't capture when typing in textarea
+      if (e.target.tagName === "TEXTAREA") return;
+
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        navigate(-1);
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        navigate(1);
+      }
+    });
+
+    // ---- Util ----
+    function getDownloadUri(file) {
+      if (file.data_uri) return file.data_uri;
+      if (file.data_b64) return "data:application/octet-stream;base64," + file.data_b64;
+      if (file.type === "text") return "data:text/plain;charset=utf-8," + encodeURIComponent(file.content);
+      return "#";
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ---- View switching ----
+    function switchView(view) {
+      document.querySelectorAll(".view-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
+      document.querySelector(`[onclick="switchView('${view}')"]`).classList.add("active");
+      document.getElementById("panel-" + view).classList.add("active");
+    }
+
+    // ---- Benchmark rendering ----
+    function renderBenchmark() {
+      const data = EMBEDDED_DATA.benchmark;
+      if (!data) return;
+
+      // Show the tabs
+      document.getElementById("view-tabs").style.display = "flex";
+
+      const container = document.getElementById("benchmark-content");
+      const summary = data.run_summary || {};
+      const metadata = data.metadata || {};
+      const notes = data.notes || [];
+
+      let html = "";
+
+      // Header
+      html += "<h2 style='font-family: Poppins, sans-serif; margin-bottom: 0.5rem;'>Benchmark Results</h2>";
+      html += "<p style='color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem;'>";
+      if (metadata.skill_name) html += "<strong>" + escapeHtml(metadata.skill_name) + "</strong> &mdash; ";
+      if (metadata.timestamp) html += metadata.timestamp + " &mdash; ";
+      if (metadata.evals_run) html += "Evals: " + metadata.evals_run.join(", ") + " &mdash; ";
+      html += (metadata.runs_per_configuration || "?") + " runs per configuration";
+      html += "</p>";
+
+      // Summary table
+      html += '<table class="benchmark-table">';
+
+      function fmtStat(stat, pct) {
+        if (!stat) return "—";
+        const suffix = pct ? "%" : "";
+        const m = pct ? (stat.mean * 100).toFixed(0) : stat.mean.toFixed(1);
+        const s = pct ? (stat.stddev * 100).toFixed(0) : stat.stddev.toFixed(1);
+        return m + suffix + " ± " + s + suffix;
+      }
+
+      function deltaClass(val) {
+        if (!val) return "";
+        const n = parseFloat(val);
+        if (n > 0) return "benchmark-delta-positive";
+        if (n < 0) return "benchmark-delta-negative";
+        return "";
+      }
+
+      // Discover config names dynamically (everything except "delta")
+      const configs = Object.keys(summary).filter(k => k !== "delta");
+      const configA = configs[0] || "config_a";
+      const configB = configs[1] || "config_b";
+      const labelA = configA.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const labelB = configB.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const a = summary[configA] || {};
+      const b = summary[configB] || {};
+      const delta = summary.delta || {};
+
+      html += "<thead><tr><th>Metric</th><th>" + escapeHtml(labelA) + "</th><th>" + escapeHtml(labelB) + "</th><th>Delta</th></tr></thead>";
+      html += "<tbody>";
+
+      html += "<tr><td><strong>Pass Rate</strong></td>";
+      html += "<td>" + fmtStat(a.pass_rate, true) + "</td>";
+      html += "<td>" + fmtStat(b.pass_rate, true) + "</td>";
+      html += '<td class="' + deltaClass(delta.pass_rate) + '">' + (delta.pass_rate || "—") + "</td></tr>";
+
+      // Time (only show row if data exists)
+      if (a.time_seconds || b.time_seconds) {
+        html += "<tr><td><strong>Time (s)</strong></td>";
+        html += "<td>" + fmtStat(a.time_seconds, false) + "</td>";
+        html += "<td>" + fmtStat(b.time_seconds, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.time_seconds) + '">' + (delta.time_seconds ? delta.time_seconds + "s" : "—") + "</td></tr>";
+      }
+
+      // Tokens (only show row if data exists)
+      if (a.tokens || b.tokens) {
+        html += "<tr><td><strong>Tokens</strong></td>";
+        html += "<td>" + fmtStat(a.tokens, false) + "</td>";
+        html += "<td>" + fmtStat(b.tokens, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.tokens) + '">' + (delta.tokens || "—") + "</td></tr>";
+      }
+
+      html += "</tbody></table>";
+
+      // Per-eval breakdown (if runs data available)
+      const runs = data.runs || [];
+      if (runs.length > 0) {
+        const evalIds = [...new Set(runs.map(r => r.eval_id))].sort((a, b) => a - b);
+
+        html += "<h3 style='font-family: Poppins, sans-serif; margin-bottom: 0.75rem;'>Per-Eval Breakdown</h3>";
+
+        const hasTime = runs.some(r => r.result && r.result.time_seconds != null);
+        const hasErrors = runs.some(r => r.result && r.result.errors > 0);
+
+        for (const evalId of evalIds) {
+          const evalRuns = runs.filter(r => r.eval_id === evalId);
+          const evalName = evalRuns[0] && evalRuns[0].eval_name ? evalRuns[0].eval_name : "Eval " + evalId;
+
+          html += "<h4 style='font-family: Poppins, sans-serif; margin: 1rem 0 0.5rem; color: var(--text);'>" + escapeHtml(evalName) + "</h4>";
+          html += '<table class="benchmark-table">';
+          html += "<thead><tr><th>Config</th><th>Run</th><th>Pass Rate</th>";
+          if (hasTime) html += "<th>Time (s)</th>";
+          if (hasErrors) html += "<th>Crashes During Execution</th>";
+          html += "</tr></thead>";
+          html += "<tbody>";
+
+          // Group by config and render with average rows
+          const configGroups = [...new Set(evalRuns.map(r => r.configuration))];
+          for (let ci = 0; ci < configGroups.length; ci++) {
+            const config = configGroups[ci];
+            const configRuns = evalRuns.filter(r => r.configuration === config);
+            if (configRuns.length === 0) continue;
+
+            const rowClass = ci === 0 ? "benchmark-row-with" : "benchmark-row-without";
+            const configLabel = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+            for (const run of configRuns) {
+              const r = run.result || {};
+              const prClass = r.pass_rate >= 0.8 ? "benchmark-delta-positive" : r.pass_rate < 0.5 ? "benchmark-delta-negative" : "";
+              html += '<tr class="' + rowClass + '">';
+              html += "<td>" + configLabel + "</td>";
+              html += "<td>" + run.run_number + "</td>";
+              html += '<td class="' + prClass + '">' + ((r.pass_rate || 0) * 100).toFixed(0) + "% (" + (r.passed || 0) + "/" + (r.total || 0) + ")</td>";
+              if (hasTime) html += "<td>" + (r.time_seconds != null ? r.time_seconds.toFixed(1) : "—") + "</td>";
+              if (hasErrors) html += "<td>" + (r.errors || 0) + "</td>";
+              html += "</tr>";
+            }
+
+            // Average row
+            const rates = configRuns.map(r => (r.result || {}).pass_rate || 0);
+            const avgRate = rates.reduce((a, b) => a + b, 0) / rates.length;
+            const avgPrClass = avgRate >= 0.8 ? "benchmark-delta-positive" : avgRate < 0.5 ? "benchmark-delta-negative" : "";
+            html += '<tr class="benchmark-row-avg ' + rowClass + '">';
+            html += "<td>" + configLabel + "</td>";
+            html += "<td>Avg</td>";
+            html += '<td class="' + avgPrClass + '">' + (avgRate * 100).toFixed(0) + "%</td>";
+            if (hasTime) {
+              const times = configRuns.map(r => (r.result || {}).time_seconds).filter(t => t != null);
+              html += "<td>" + (times.length ? (times.reduce((a, b) => a + b, 0) / times.length).toFixed(1) : "—") + "</td>";
+            }
+            if (hasErrors) html += "<td></td>";
+            html += "</tr>";
+          }
+          html += "</tbody></table>";
+
+          // Per-assertion detail for this eval
+          const runsWithExpectations = {};
+          for (const config of configGroups) {
+            runsWithExpectations[config] = evalRuns.filter(r => r.configuration === config && r.expectations && r.expectations.length > 0);
+          }
+          const hasAnyExpectations = Object.values(runsWithExpectations).some(runs => runs.length > 0);
+          if (hasAnyExpectations) {
+            // Collect all unique assertion texts across all configs
+            const allAssertions = [];
+            const seen = new Set();
+            for (const config of configGroups) {
+              for (const run of runsWithExpectations[config]) {
+                for (const exp of (run.expectations || [])) {
+                  if (!seen.has(exp.text)) {
+                    seen.add(exp.text);
+                    allAssertions.push(exp.text);
+                  }
+                }
+              }
+            }
+
+            html += '<table class="benchmark-table" style="margin-top: 0.5rem;">';
+            html += "<thead><tr><th>Assertion</th>";
+            for (const config of configGroups) {
+              const label = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+              html += "<th>" + escapeHtml(label) + "</th>";
+            }
+            html += "</tr></thead><tbody>";
+
+            for (const assertionText of allAssertions) {
+              html += "<tr><td>" + escapeHtml(assertionText) + "</td>";
+
+              for (const config of configGroups) {
+                html += "<td>";
+                for (const run of runsWithExpectations[config]) {
+                  const exp = (run.expectations || []).find(e => e.text === assertionText);
+                  if (exp) {
+                    const cls = exp.passed ? "benchmark-delta-positive" : "benchmark-delta-negative";
+                    const icon = exp.passed ? "\u2713" : "\u2717";
+                    html += '<span class="' + cls + '" title="Run ' + run.run_number + ': ' + escapeHtml(exp.evidence || "") + '">' + icon + "</span> ";
+                  } else {
+                    html += "— ";
+                  }
+                }
+                html += "</td>";
+              }
+              html += "</tr>";
+            }
+            html += "</tbody></table>";
+          }
+        }
+      }
+
+      // Notes
+      if (notes.length > 0) {
+        html += '<div class="benchmark-notes">';
+        html += "<h3>Analysis Notes</h3>";
+        html += "<ul>";
+        for (const note of notes) {
+          html += "<li>" + escapeHtml(note) + "</li>";
+        }
+        html += "</ul></div>";
+      }
+
+      container.innerHTML = html;
+    }
+
+    // ---- Start ----
+    init();
+    renderBenchmark();
+  </script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+{
+  "skill_name": "yoad-job-search",
+  "evals": [
+    {
+      "id": 1,
+      "name": "israel-jobs-specific-company",
+      "prompt": "my brother yoad just graduated CS and is looking for his first dev job. can you check if fireblocks has any open positions? he's based in israel",
+      "expected_output": "A list of job openings at Fireblocks fetched from the Greenhouse API, with titles, locations, and apply URLs. Should highlight any junior/entry-level positions.",
+      "skill": "israel-jobs",
+      "files": [],
+      "expectations": [
+        "The skill fetches data from the Fireblocks Greenhouse API endpoint (boards-api.greenhouse.io)",
+        "Results include job titles and apply URLs",
+        "Results mention location information",
+        "Output is formatted in a readable list or table"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "israel-jobs-general-search",
+      "prompt": "search for junior software developer jobs in Israel across all the Israeli job boards. yoad just graduated and has no preference on tech stack",
+      "expected_output": "Results from multiple Israeli job boards (AllJobs, Drushim, Indeed IL, etc.) in both Hebrew and English, with source attribution and fit scoring.",
+      "skill": "israel-jobs",
+      "files": [],
+      "expectations": [
+        "WebSearch is used to query at least 2 different Israeli job board sites",
+        "At least one Hebrew search query is executed (containing Hebrew characters)",
+        "Results include source attribution (which site each job came from)",
+        "Output includes job titles and URLs or directions to apply"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "ashby-remote-scan",
+      "prompt": "scan ashby companies for remote software developer positions that yoad could apply to - he's a fresh CS grad looking to work remotely from israel",
+      "expected_output": "Remote-only job listings fetched from Ashby API endpoints, filtered for developer roles and excluding senior positions.",
+      "skill": "ashby-remote",
+      "files": [],
+      "expectations": [
+        "Multiple Ashby API endpoints are fetched (at least 3 companies)",
+        "Results only include remote positions (isRemote or workplaceType filtering mentioned)",
+        "Senior/staff/principal/director roles are excluded or deprioritized",
+        "Results include company name, job title, and apply URL for each listing"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "job-search-il-default",
+      "prompt": "run a broad job search across Israeli sites for yoad. he's a recent CS graduate looking for any junior dev role in israel or remote. no specific tech stack preference",
+      "expected_output": "Aggregated results from multiple Israeli job boards using WebSearch, scored by fit, with new results saved to history.",
+      "skill": "job-search-il",
+      "files": [],
+      "expectations": [
+        "WebSearch queries are run for multiple Israeli job sites",
+        "Both Hebrew and English search queries are used",
+        "Results are scored or categorized by fit (High/Medium/Low)",
+        "Output mentions saving to or checking ~/.yoad-jobs/job-history.md",
+        "Results include source attribution for each job listing"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "job-search-il-keyword",
+      "prompt": "search Israeli job sites for 'Python developer' positions for yoad. he just finished his CS degree and is based in tel aviv",
+      "expected_output": "Targeted search results for Python developer roles from Israeli sites, using the provided keyword instead of defaults.",
+      "skill": "job-search-il",
+      "files": [],
+      "expectations": [
+        "The keyword 'Python' appears in the search queries",
+        "WebSearch queries target Israeli job board sites",
+        "Results are relevant to Python development roles",
+        "Output includes fit scoring or relevance assessment"
+      ]
+    }
+  ]
+}

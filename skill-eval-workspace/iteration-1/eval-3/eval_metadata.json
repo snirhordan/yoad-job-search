@@ -1,0 +1,32 @@
+{
+  "eval_id": 3,
+  "eval_name": "ashby-remote-scan",
+  "prompt": "scan ashby companies for remote software developer positions that yoad could apply to - he's a fresh CS grad looking to work remotely from israel",
+  "assertions": [
+    {
+      "text": "At least 3 Ashby API endpoints are fetched (api.ashbyhq.com/posting-api/job-board/...)",
+      "type": "process",
+      "verifiable_by": "transcript"
+    },
+    {
+      "text": "Results are filtered for remote positions (mentions isRemote, workplaceType, or Remote filtering)",
+      "type": "process",
+      "verifiable_by": "transcript"
+    },
+    {
+      "text": "Senior/staff/principal/director roles are excluded or noted as excluded",
+      "type": "content",
+      "verifiable_by": "output"
+    },
+    {
+      "text": "Results include company name, job title, and apply URL for each listing",
+      "type": "content",
+      "verifiable_by": "output"
+    },
+    {
+      "text": "A summary total is provided (X jobs found across Y companies)",
+      "type": "format",
+      "verifiable_by": "output"
+    }
+  ]
+}

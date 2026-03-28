@@ -1,0 +1,68 @@
+{
+  "expectations": [
+    {
+      "text": "The output fetches data from the Fireblocks Greenhouse API endpoint (boards-api.greenhouse.io/v1/boards/fireblocks/jobs)",
+      "passed": true,
+      "evidence": "Transcript Step 2 shows: 'Tool: WebFetch, URL: https://boards-api.greenhouse.io/v1/boards/fireblocks/jobs'. Results.md header confirms 'Source: Greenhouse API (https://boards-api.greenhouse.io/v1/boards/fireblocks/jobs)'."
+    },
+    {
+      "text": "Results include specific job titles (not just 'jobs available')",
+      "passed": true,
+      "evidence": "Results.md lists 30 specific job titles in tables, e.g., 'Application Security Engineer', 'Senior Backend Engineer, Key Management', 'Senior Full-Stack Engineer, DX', 'Technical Integration Engineer', etc."
+    },
+    {
+      "text": "Results include apply URLs or links for individual positions",
+      "passed": true,
+      "evidence": "Every job listing includes a Greenhouse apply link, e.g., '[Apply](https://job-boards.greenhouse.io/fireblocks/jobs/4659362006)' for Application Security Engineer, and similar for all 30 listed positions."
+    },
+    {
+      "text": "Results mention location information for jobs",
+      "passed": true,
+      "evidence": "Israel-based positions are labeled 'Tel Aviv, Israel'. The complete engineering list includes locations like 'Belgrade, Serbia', 'Warsaw, Poland', 'Prague, Czech Republic', 'New York, USA', 'Latin America (Remote)', 'Toronto, Canada', etc."
+    },
+    {
+      "text": "Output is formatted as a readable list or table (not raw JSON)",
+      "passed": true,
+      "evidence": "Results are formatted as Markdown tables with columns (Title, Department, Salary, Apply Link) and organized under section headers (Israel-Based, Potentially Relevant, All Engineering Roles). No raw JSON in output."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_tokens": 22705,
+    "total_duration_seconds": 115.6
+  },
+  "claims": [
+    {
+      "claim": "Fireblocks has 65 total open positions",
+      "type": "factual",
+      "verified": true,
+      "evidence": "The WebFetch call returned 65 positions per the transcript, and the results header confirms 'Total open positions: 65'."
+    },
+    {
+      "claim": "17 positions are in Israel (Tel Aviv)",
+      "type": "factual",
+      "verified": true,
+      "evidence": "The results list 17 Israel-based positions across the Engineering and Non-Engineering Israel tables (10 engineering + 7 non-engineering). The count is consistent."
+    },
+    {
+      "claim": "No junior or entry-level positions found",
+      "type": "quality",
+      "verified": true,
+      "evidence": "All engineering titles listed contain 'Senior', 'Staff', 'Lead', or 'Director' except 3 roles (Application Security Engineer, Information Security Engineer, Technical Integration Engineer) which the output correctly notes as potentially more flexible."
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "The output fetches data from the Fireblocks Greenhouse API endpoint (boards-api.greenhouse.io/v1/boards/fireblocks/jobs)",
+        "reason": "This assertion is skill-specific and will trivially fail for without_skill runs since those won't know to use the Greenhouse API. This is by design for differentiating skill vs no-skill, but it should be acknowledged that this assertion measures skill knowledge, not output quality."
+      }
+    ],
+    "overall": "Assertions are solid and test meaningful outcomes. The Greenhouse API assertion is the key discriminator between skill and no-skill runs."
+  }
+}

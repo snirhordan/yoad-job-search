@@ -1,0 +1,27 @@
+{
+  "eval_id": 5,
+  "eval_name": "job-search-il-keyword",
+  "prompt": "search Israeli job sites for 'Python developer' positions for yoad. he just finished his CS degree and is based in tel aviv",
+  "assertions": [
+    {
+      "text": "The keyword 'Python' appears in the WebSearch queries",
+      "type": "process",
+      "verifiable_by": "transcript"
+    },
+    {
+      "text": "WebSearch queries target Israeli job board sites (alljobs, drushim, indeed il, etc.)",
+      "type": "process",
+      "verifiable_by": "transcript"
+    },
+    {
+      "text": "Results are relevant to Python development roles (Python mentioned in listings)",
+      "type": "content",
+      "verifiable_by": "output"
+    },
+    {
+      "text": "Output includes fit scoring or relevance assessment for each result",
+      "type": "content",
+      "verifiable_by": "output"
+    }
+  ]
+}
