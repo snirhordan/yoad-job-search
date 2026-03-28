@@ -19,7 +19,7 @@ allowed-tools: WebFetch, WebSearch
 | cybereason | https://boards-api.greenhouse.io/v1/boards/cybereason/jobs |
 | papaya | https://boards-api.greenhouse.io/v1/boards/papaya/jobs |
 | payoneer | https://boards-api.greenhouse.io/v1/boards/payoneer/jobs |
-| monday | https://boards-api.greenhouse.io/v1/boards/mondaydotcom/jobs |
+| monday | https://monday.com/careers (WebSearch: `site:monday.com/careers developer`) |
 | wix | https://boards-api.greenhouse.io/v1/boards/wix/jobs |
 | checkpoint | https://boards-api.greenhouse.io/v1/boards/checkpoint/jobs |
 | jfrog | https://boards-api.greenhouse.io/v1/boards/jfrog/jobs |
@@ -117,5 +117,6 @@ User query: $ARGUMENTS
 3. WebSearch with Hebrew terms, extract results
 
 ### After displaying results:
-1. Append to `~/.yoad-jobs/job-history.md`
-2. Save high-fit postings to `~/.yoad-jobs/jobs/[company]-[date]/posting.md`
+1. Deduplicate results by company + title against `~/.yoad-jobs/job-history.md`
+2. Append new jobs to `~/.yoad-jobs/job-history.md`
+3. Save high-fit postings to `~/.yoad-jobs/jobs/[company]-[date]/posting.md`
