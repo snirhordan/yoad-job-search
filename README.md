@@ -4,21 +4,118 @@ Israel-focused job discovery platform for junior software developers, powered by
 
 Searches 10+ Israeli job boards (Hebrew + English), 35+ Israeli tech company APIs, 50+ Ashby companies for remote roles, and Indeed via MCP — all from the terminal.
 
-## Prerequisites
+---
 
-1. **Claude Code** installed ([claude.ai/code](https://claude.ai/code))
-2. **GitHub CLI** (`gh`) authenticated
-3. **Indeed MCP connector** enabled in Claude settings (optional, for Indeed searches)
+## Getting Started (from zero)
 
-## Quick Start
+### Step 1: Install Claude Code
+
+Open a terminal and run:
 
 ```bash
-cd ~/yoad
+npm install -g @anthropic-ai/claude-code
+```
+
+If you don't have npm, install Node.js first from https://nodejs.org (download the LTS version, install it, then retry the command above).
+
+After installation, run `claude` once to log in with your Anthropic account. Follow the prompts to authenticate.
+
+### Step 2: Clone this repo
+
+```bash
+git clone https://github.com/snirhordan/yoad-job-search.git ~/yoad-job-search
+```
+
+### Step 3: Create the data directory
+
+```bash
+mkdir -p ~/.yoad-jobs
+cp ~/yoad-job-search/preferences.md ~/.yoad-jobs/preferences.md
+touch ~/.yoad-jobs/job-history.md
+```
+
+### Step 4: Start searching for jobs
+
+```bash
+cd ~/yoad-job-search
 claude
 ```
 
-Then run any of these commands:
+Claude will open. Type any of these commands:
 
+```
+/job-search-il                    # Search all Israeli job boards
+/israel-jobs wix                  # Check jobs at a specific company
+/ashby-remote                     # Find remote jobs worldwide
+```
+
+That's it!
+
+---
+
+## הוראות בעברית
+
+### שלב 1: התקנת Claude Code
+
+פתח טרמינל והרץ:
+```bash
+npm install -g @anthropic-ai/claude-code
+```
+
+אם אין לך npm, תתקין קודם Node.js מ-https://nodejs.org (תוריד את גרסת LTS, תתקין, ואז תנסה שוב).
+
+אחרי ההתקנה, תרשום `claude` פעם אחת כדי להתחבר עם החשבון שלך באנתרופיק.
+
+### שלב 2: שכפול הפרויקט
+
+```bash
+git clone https://github.com/snirhordan/yoad-job-search.git ~/yoad-job-search
+```
+
+### שלב 3: יצירת תיקיית הנתונים
+
+```bash
+mkdir -p ~/.yoad-jobs
+cp ~/yoad-job-search/preferences.md ~/.yoad-jobs/preferences.md
+touch ~/.yoad-jobs/job-history.md
+```
+
+### שלב 4: חיפוש משרות
+
+```bash
+cd ~/yoad-job-search
+claude
+```
+
+קלוד ייפתח. תרשום אחת מהפקודות:
+
+| פקודה | מה עושה |
+|-------|---------|
+| `/job-search-il` | חיפוש בכל האתרים הישראליים (עברית + אנגלית) |
+| `/job-search-il Python` | חיפוש עם מילת מפתח ספציפית |
+| `/israel-jobs wix` | בדיקת משרות בחברה מסוימת |
+| `/israel-jobs` | חיפוש בכל חברות ההייטק הישראליות |
+| `/ashby-remote` | משרות Remote בחברות בינלאומיות |
+
+---
+
+## Prerequisites (detailed)
+
+1. **Node.js** (v18+) — https://nodejs.org
+2. **Claude Code** — `npm install -g @anthropic-ai/claude-code`
+3. **Git** — comes pre-installed on Mac/Linux; on Windows install from https://git-scm.com
+4. **GitHub CLI** (`gh`) — optional, only needed for contributing
+5. **Indeed MCP connector** — optional, enable in Claude settings for Indeed searches
+
+## Quick Start (for experienced users)
+
+```bash
+git clone https://github.com/snirhordan/yoad-job-search.git ~/yoad-job-search
+mkdir -p ~/.yoad-jobs && cp ~/yoad-job-search/preferences.md ~/.yoad-jobs/
+cd ~/yoad-job-search && claude
+```
+
+Then:
 ```
 /job-search-il                          # Broad search across all Israeli sites
 /job-search-il Python developer         # Search with specific keywords
